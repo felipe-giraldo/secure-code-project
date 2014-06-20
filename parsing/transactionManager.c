@@ -29,7 +29,7 @@ char *getParm(char **p, char **q) {
     char *j = *q;
     int l = 0;
     
-    while (*j != ',' && *j != 0) {
+    while (*j != ',' && *j != 0 && l <= 80) {
        l ++;
        j ++;
     }
@@ -41,7 +41,7 @@ char *getParm(char **p, char **q) {
     *q = *p;
     
     return r;
-}
+} // getParm
 
 /***********************************************************************
  * Method for insert rows in the database
@@ -62,8 +62,8 @@ int databaseOperation(char *date, char *fromAccount, char *toAccount, double val
 	MYSQL *connector;
 	MYSQL_RES *resultSet;
 	
-	char *server = "localhost";
-	char *user = "root";
+	char *server   = "localhost";
+	char *user     = "root";
 	char *password = "samurai";
 	char *database = "parsing";
 	connector = mysql_init(NULL);
@@ -91,7 +91,7 @@ int databaseOperation(char *date, char *fromAccount, char *toAccount, double val
 	mysql_free_result(resultSet);
 	mysql_close(connector);
 	return 0;
-}
+} // databaseOperation
 
 /***********************************************************************
  * Begin method
@@ -117,7 +117,7 @@ int main (int argc, char *argv[]) {
 			param[i] = (char *)getParm(&p, &q);
         }
         
-        
+      // Aquí validar todos  los parámetros y proteger contra SQLi
         
 		databaseOperation(param[0], param[1], param[2], atof(param[3]), param[4], param[5], param[6]);
 		
@@ -126,4 +126,4 @@ int main (int argc, char *argv[]) {
      }
      fclose(fichero);
      return(0);
-}
+} // main
