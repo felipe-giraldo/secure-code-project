@@ -11,8 +11,8 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- Dumping database structure for advlogin
---CREATE DATABASE IF NOT EXISTS `advlogin` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_spanish_ci */;
---USE `advlogin`;
+CREATE DATABASE IF NOT EXISTS `advlogin` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_spanish_ci */;
+USE `advlogin`;
 
 
 -- Dumping structure for table advlogin.account
