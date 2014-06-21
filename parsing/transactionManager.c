@@ -10,16 +10,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <assert.h>
 #include <mysql.h>
 
 /***********************************************************************
  * Method for splitting words with a delimiter
- * 
+ *
  * Parameters:
  * - p: Pointer to first character of parameter
  * - q: Pointer past the last character of the parameter
- * 
+ *
  * Return: a pointer to parameter
  */
 char *getParm(char **p, char **q) {
@@ -28,24 +29,42 @@ char *getParm(char **p, char **q) {
     char *i = *p;
     char *j = *q;
     int l = 0;
-    
+
     while (*j != ',' && *j != 0 && l <= 80) {
-       l ++;
-       j ++;
+        l ++;
+        j ++;
     }
 
-    r = (char *)malloc(sizeof(char) * (l + 1));
+    r = (char *) malloc(sizeof(char) * (l + 1));
     strncpy(r, i, l);
     r[l] = 0;
     *p = j + 1;
     *q = *p;
-    
+
     return r;
 } // getParm
 
 /***********************************************************************
+ * Method for get the date time
+ *
+ * Retunr: the date of the day
+ */
+char *getDate() {
+
+    time_t t;
+    struct tm *tm;
+    char date[100];
+
+    t = time(NULL);
+    tm = localtime(&t);
+    strftime(date, 100, "%Y-%m-%d", tm);
+
+    return date;
+}
+
+/***********************************************************************
  * Method for insert rows in the database
- * 
+ *
  * Parameters:
  * - date: Date of movement
  * - fromAccount: account movement from
@@ -54,40 +73,44 @@ char *getParm(char **p, char **q) {
  * - token: Identifier to validate the transaction
  * - type: Type of transaction (CREDIT, DEBIT)
  * - status: state of the transaction (APPROVE, DECLINE, IN VALIDATION)
- * 
- * Retunr: true if satisfied or false in otherwise
+ *
+ * Return:
+ * - 0 if insert
+ * - 1 if the server conection is not successful
+ * - 2 if the query return and error
  */
-int databaseOperation(char *date, char *fromAccount, char *toAccount, double value, char *token, char *type, char *status) {
-	
+int insertTransaction(char *fromAccount, char *toAccount, char *value, char *token, char *type) {
+
 	MYSQL *connector;
 	MYSQL_RES *resultSet;
-	
+
 	char *server   = "localhost";
-	char *user     = "root";
-	char *password = "samurai";
-	char *database = "parsing";
+	char *user     = "advlogin";
+	char *password = "Hard+20.";
+	char *database = "advlogin";
 	connector = mysql_init(NULL);
-	
-	/* Connect to database */
+
+	// Connect to database
 	if (!mysql_real_connect(connector, server, user, password, database, 0, NULL, 0)) {
-		/* If error, print the error in the standar output */
+		// If error, print the error in the standar output
 		fprintf(stderr, "%s\n", mysql_error(connector));
 		return 1;
 	}
 
-	/* Send the SQL query */
+	// Send the SQL query
 	char *queryString = (char *) malloc(200);
 	char *table = "transactions";
-	
-	/* Query example: INSERT INTO transactions VALUES (null, '2014-06-18', 'CA-1234567890', 'CC-2345678901', 1000.0, 'TOKEN-123456789', 'DEBIT', 'APPROVED') */
-	sprintf(queryString, "INSERT INTO %s VALUES (null, '%s', '%s', '%s', %f, '%s', '%s', '%s')", table, date, fromAccount, toAccount, value, token, type, status);
+
+	// Query example: INSERT INTO transactions VALUES (null, '1234567890', '2345678901', 1000, 'TOKEN-123456789', 2014-06-21, 99, 1)
+	sprintf(queryString, "INSERT INTO %s VALUES (null, %s, %s, %d, %s, '%s', %d, %d)",
+         table, fromAccount, toAccount, atoi(value), token, getDate(), 99, atoi(type));
 	if (mysql_query(connector, queryString)) {
 		fprintf(stderr, "%s\n", mysql_error(connector));
 		return 2;
 	}
 	resultSet = mysql_use_result(connector);
 
-	/* Free resources */
+	// Free resources
 	mysql_free_result(resultSet);
 	mysql_close(connector);
 	return 0;
@@ -97,33 +120,32 @@ int databaseOperation(char *date, char *fromAccount, char *toAccount, double val
  * Begin method
  */
 int main (int argc, char *argv[]) {
-	
-	char linea[81];
+
+    char linea[81];
     FILE* fichero;
-    char **param = (char **)malloc( sizeof( char *) * 7);
+    char **param = (char **)malloc( sizeof( char *) * 5);
     char *p, *q;
     int  i = 0;
     fichero = fopen("movements.txt", "rt");
     if (fichero == NULL) {
-		printf("Archivo inexistente!\n");
-		exit(1);
+        printf("Archivo inexistente!\n");
+        exit(1);
     }
-   
+
     while (!feof(fichero)) {
         fgets(linea, 80, fichero);
 
         p = q = linea;
-        for (i = 0; i < 7; i ++) {
-			param[i] = (char *)getParm(&p, &q);
+        for (i = 0; i < 5; i ++) {
+            param[i] = (char *)getParm(&p, &q);
         }
-        
-      // Aquí validar todos  los parámetros y proteger contra SQLi
-        
-		databaseOperation(param[0], param[1], param[2], atof(param[3]), param[4], param[5], param[6]);
-		
-        for (i = 0; i < 4; i ++)
+
+        // Aquí validar todos  los parámetros y proteger contra SQLi
+		insertTransaction(param[0], param[1], param[2], param[3], param[4]);
+
+        for (i = 0; i < 5; i ++)
             free(param[i]);
-     }
-     fclose(fichero);
-     return(0);
+    }
+    fclose(fichero);
+    return(0);
 } // main
