@@ -300,17 +300,32 @@ int main (int argc, char *argv[]) {
         p = q = line;
         for (i = 0; i < 5; i ++) {
             param[i] = (char *)getParms(&p, &q);
+            printf("%s\n", param[i]);
+            if (param[i] == 0) {
+				printf("*** Error: falta parametro %d", i);
+				break;
+			}
         }
+        
+        if (i < 5)
+			continue;
 
         // Aquí validar todos  los parámetros y proteger contra SQLi
+//        char *msg = validate(param);
+//        if (msg != 0) {
+//			printf("*** Error: %s\n", msg);
+//			continue;
+//		}
+        
         insertTransaction(param[0], param[1], param[2], param[3], param[4]);
 
-        for (i = 0; i < 5; i ++)
-            printf("%s\n", param[i]);
+//        for (i = 0; i < 5; i ++)
+//            printf("%s\n", param[i]);
 
         for (i = 0; i < 5; i ++)
             free(param[i]);
     }
+    free(param);
     fclose(file);
     return(0);
 } // main
