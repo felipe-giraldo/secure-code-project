@@ -17,11 +17,10 @@
 /***********************************************************************
  * Class parameters
  */
-final char *server   = "localhost";
-final char *user     = "advlogin";
-final char *password = "Hard+20.";
-final char *database = "advlogin";
-final char *table = "transactions";
+char *server   = "localhost";
+char *user     = "advlogin";
+char *password = "Hard+20.";
+char *database = "advlogin";
 
 /***********************************************************************
  * Method for splitting words with a delimiter
@@ -103,6 +102,7 @@ int insertTransaction(char *fromAccount, char *toAccount, char *value, char *tok
 
 	// Send the SQL query
 	char *queryString = (char *) malloc(200);
+	char *table = "transactions";
 
 	// Query example: INSERT INTO transactions VALUES (null, '1234567890', '2345678901', 1000, 'TOKEN-123456789', 2014-06-21, 99, 1)
 	sprintf(queryString, "INSERT INTO %s VALUES (null, %s, %s, %d, %s, '%s', %d, %d)",
@@ -147,20 +147,22 @@ int searchTokenIfUser(char *token) {
 	// Send the SQL query
 	char *queryString = (char *) malloc(200);
 	char *column = "used";
+	char *table = "user_token";
 
-	sprintf(queryString, "SELECT %s FROM  %s WHERE token_id = '%s'", column, table, token);
+	sprintf(queryString, "SELECT %s FROM %s WHERE token_id = '%s'", column, table, token);
+	printf(queryString);
 	if (mysql_query(connector, queryString)) {
 		fprintf(stderr, "%s\n", mysql_error(connector));
 		return 2;
 	}
 	resultSet = mysql_use_result(connector);
-	printf(resultSet);
+	printf("\nToken %s: %s", token, resultSet);
 
 	// Free resources
 	mysql_free_result(resultSet);
 	mysql_close(connector);
 	return 0;
-} // databaseOperation
+} // searchTokenIfUser
 
 /***********************************************************************
  * Begin method
@@ -178,9 +180,11 @@ int main (int argc, char *argv[]) {
         exit(1);
     }
 
+	searchTokenIfUser("2G2ngqt8sjYNtJ8");
+	
     while (!feof(file)) {
         fgets(line, 80, file);
-        printf("%s", line);
+        //printf("%s", line);
 
         p = q = line;
         for (i = 0; i < 5; i ++) {
@@ -188,11 +192,10 @@ int main (int argc, char *argv[]) {
         }
 
         // Aquí validar todos  los parámetros y proteger contra SQLi
-        insertTransaction(param[0], param[1], param[2], param[3], param[4]);
-		searchTokenIfUser("2G2ngqt8sjYNtJ8");
+        //insertTransaction(param[0], param[1], param[2], param[3], param[4]);
 
-        for (i = 0; i < 5; i ++)
-            printf("%s\n", param[i]);
+        //for (i = 0; i < 5; i ++)
+            //printf("%s\n", param[i]);
 
         for (i = 0; i < 5; i ++)
             free(param[i]);
