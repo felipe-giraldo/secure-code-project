@@ -231,7 +231,7 @@
 <?php break;?>
 <?php default:?>
 <?php $userrow = $user->getUsers();
-    $useraccounts = $core->getAccounts();
+    //$useraccounts = $core->getAccounts($userrow -> id);
 ?>
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i>Here you can upload transfers in batch mode<br /></p>
 <section class="widget">

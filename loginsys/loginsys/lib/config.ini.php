@@ -9,8 +9,8 @@
 	* the database configuration settings. 
 	*/
 	 define('DB_SERVER', 'localhost'); 
-	 define('DB_USER', 'root'); 
-	 define('DB_PASS', '000000'); 
+	 define('DB_USER', 'advlogin'); 
+	 define('DB_PASS', 'Hard+20.'); 
 	 define('DB_DATABASE', 'advlogin');
  
 	/** 
