@@ -23,7 +23,7 @@
  *
  * Return: a pointer to parameter
  */
-char *getParm(char **p, char **q) {
+char *getParms(char **p, char **q) {
 
     char *r = 0;
     char *i = *p;
@@ -42,7 +42,7 @@ char *getParm(char **p, char **q) {
     *q = *p;
 
     return r;
-} // getParm
+} // getParms
 
 /***********************************************************************
  * Method for get the date time
@@ -53,18 +53,14 @@ char *getDate() {
 
     time_t t;
     struct tm *tm;
-<<<<<<< HEAD
     char *date = (char *) malloc(100);
-=======
-    char date[100];
->>>>>>> 83595b85bfc7a0206dfd5c4ce0e78487fbc26461
 
     t = time(NULL);
     tm = localtime(&t);
     strftime(date, 100, "%Y-%m-%d", tm);
 
     return date;
-}
+} // getDate
 
 /***********************************************************************
  * Method for insert rows in the database
@@ -125,7 +121,6 @@ int insertTransaction(char *fromAccount, char *toAccount, char *value, char *tok
  */
 int main (int argc, char *argv[]) {
 
-<<<<<<< HEAD
     char line[81];
     FILE* file;
     char **param = (char **)malloc( sizeof( char *) * 5);
@@ -142,43 +137,19 @@ int main (int argc, char *argv[]) {
         printf("%s", line);
 
         p = q = line;
-=======
-    char linea[81];
-    FILE* fichero;
-    char **param = (char **)malloc( sizeof( char *) * 5);
-    char *p, *q;
-    int  i = 0;
-    fichero = fopen("movements.txt", "rt");
-    if (fichero == NULL) {
-        printf("Archivo inexistente!\n");
-        exit(1);
-    }
-
-    while (!feof(fichero)) {
-        fgets(linea, 80, fichero);
-
-        p = q = linea;
->>>>>>> 83595b85bfc7a0206dfd5c4ce0e78487fbc26461
         for (i = 0; i < 5; i ++) {
-            param[i] = (char *)getParm(&p, &q);
+            param[i] = (char *)getParms(&p, &q);
         }
 
         // Aquí validar todos  los parámetros y proteger contra SQLi
-		insertTransaction(param[0], param[1], param[2], param[3], param[4]);
-<<<<<<< HEAD
-		
+	insertTransaction(param[0], param[1], param[2], param[3], param[4]);
+	
         for (i = 0; i < 5; i ++)
             printf("%s\n", param[i]);
-=======
->>>>>>> 83595b85bfc7a0206dfd5c4ce0e78487fbc26461
 
         for (i = 0; i < 5; i ++)
             free(param[i]);
     }
-<<<<<<< HEAD
     fclose(file);
-=======
-    fclose(fichero);
->>>>>>> 83595b85bfc7a0206dfd5c4ce0e78487fbc26461
     return(0);
 } // main
