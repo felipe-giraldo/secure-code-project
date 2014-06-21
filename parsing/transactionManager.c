@@ -15,6 +15,15 @@
 #include <mysql.h>
 
 /***********************************************************************
+ * Class parameters
+ */
+final char *server   = "localhost";
+final char *user     = "advlogin";
+final char *password = "Hard+20.";
+final char *database = "advlogin";
+final char *table = "transactions";
+
+/***********************************************************************
  * Method for splitting words with a delimiter
  *
  * Parameters:
@@ -66,7 +75,6 @@ char *getDate() {
  * Method for insert rows in the database
  *
  * Parameters:
- * - date: Date of movement
  * - fromAccount: account movement from
  * - toAccount: account movement to
  * - value: Value to movement
@@ -84,10 +92,6 @@ int insertTransaction(char *fromAccount, char *toAccount, char *value, char *tok
 	MYSQL *connector;
 	MYSQL_RES *resultSet;
 
-	char *server   = "localhost";
-	char *user     = "advlogin";
-	char *password = "Hard+20.";
-	char *database = "advlogin";
 	connector = mysql_init(NULL);
 
 	// Connect to database
@@ -99,7 +103,6 @@ int insertTransaction(char *fromAccount, char *toAccount, char *value, char *tok
 
 	// Send the SQL query
 	char *queryString = (char *) malloc(200);
-	char *table = "transactions";
 
 	// Query example: INSERT INTO transactions VALUES (null, '1234567890', '2345678901', 1000, 'TOKEN-123456789', 2014-06-21, 99, 1)
 	sprintf(queryString, "INSERT INTO %s VALUES (null, %s, %s, %d, %s, '%s', %d, %d)",
@@ -115,6 +118,49 @@ int insertTransaction(char *fromAccount, char *toAccount, char *value, char *tok
 	mysql_close(connector);
 	return 0;
 } // insertTransaction
+
+/***********************************************************************
+ * Method for search if a token is used
+ *
+ * Parameters:
+ * - token: Identifier to validate the transaction
+ *
+ * Return:
+ * - 0 if insert
+ * - 1 if the server conection is not successful
+ * - 2 if the query return and error
+ */
+int searchTokenIfUser(char *token) {
+
+	MYSQL *connector;
+	MYSQL_RES *resultSet;
+
+	connector = mysql_init(NULL);
+
+	// Connect to database
+	if (!mysql_real_connect(connector, server, user, password, database, 0, NULL, 0)) {
+		// If error, print the error in the standar output
+		fprintf(stderr, "%s\n", mysql_error(connector));
+		return 1;
+	}
+
+	// Send the SQL query
+	char *queryString = (char *) malloc(200);
+	char *column = "used";
+
+	sprintf(queryString, "SELECT %s FROM  %s WHERE token_id = '%s'", column, table, token);
+	if (mysql_query(connector, queryString)) {
+		fprintf(stderr, "%s\n", mysql_error(connector));
+		return 2;
+	}
+	resultSet = mysql_use_result(connector);
+	printf(resultSet);
+
+	// Free resources
+	mysql_free_result(resultSet);
+	mysql_close(connector);
+	return 0;
+} // databaseOperation
 
 /***********************************************************************
  * Begin method
@@ -142,8 +188,9 @@ int main (int argc, char *argv[]) {
         }
 
         // Aquí validar todos  los parámetros y proteger contra SQLi
-	insertTransaction(param[0], param[1], param[2], param[3], param[4]);
-	
+        insertTransaction(param[0], param[1], param[2], param[3], param[4]);
+		searchTokenIfUser("2G2ngqt8sjYNtJ8");
+
         for (i = 0; i < 5; i ++)
             printf("%s\n", param[i]);
 
