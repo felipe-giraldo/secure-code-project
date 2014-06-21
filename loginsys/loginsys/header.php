@@ -42,7 +42,8 @@
   <div id="usermenu" class="flright"> 
       <a href="main.php?do=transactions"><i class="icon-laptop"></i> Transactions</a> 
       <a href="main.php?do=tokens"><i class="icon-cog"></i> Tokens</a> 
-      <a href="main.php?do=transfers"><i class="icon-exchange"></i> Transfers</a> 
+      <a href="main.php?do=transfers"><i class="icon-exchange"></i> Transfers</a>
+	  <a href="main.php?do=batchTransfers"><i class="icon-exchange"></i>Batch Transfers</a>	  
       <a href="main.php?do=purchase"><i class="icon-lock"></i> Purchases</a> 
     <!--<a href="contact.php"><i class="icon-envelope"></i> Contact Us</a>-->
     <?php if($user->logged_in):?>
