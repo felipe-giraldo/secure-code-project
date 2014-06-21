@@ -1,6 +1,6 @@
 
-CREATE DATABASE parsing;
-USE parsing;
+CREATE DATABASE advlogin;
+USE advlogin;
 
 DROP TABLE IF EXIST transactions;
 CREATE TABLE IF NOT EXISTS transactions (
