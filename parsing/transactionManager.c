@@ -33,24 +33,29 @@ char *database = "advlogin";
  */
 char *getParms(char **p, char **q) {
 
-    char *r = 0;
-    char *i = *p;
-    char *j = *q;
-    int l = 0;
+   char *r = 0;   // r: Result param
+   char *i = *p;  // i: starting position
+   char *j = *q;  // j: running end position
+   int l = 0;     // l: number of chars in param
 
-    while (*j != ',' && *j != 0 && l <= 80) {
-        l ++;
-        j ++;
-    }
+   if ( *j != 0)
+   {
+      while (*j != ',' && *j != 0 && l <= 80)
+      {
+         l ++;
+         j ++;
+      }
 
-    r = (char *) malloc(sizeof(char) * (l + 1));
-    strncpy(r, i, l);
-    r[l] = 0;
-    *p = j + 1;
-    *q = *p;
+      r = (char *) malloc(sizeof(char) * (l + 1));
+      strncpy(r, i, l);
+      r[l] = 0;
+      *p = (*j == 0)? j : j + 1;
+      *q = *p;
+   }
 
-    return r;
+   return r;
 } // getParms
+
 
 /***********************************************************************
  * Method for get the date time
@@ -69,6 +74,112 @@ char *getDate() {
 
     return date;
 } // getDate
+
+/***********************************************************************
+ * Method for validate the params for the transaction
+ * 
+ * Parameters: list of parameters of transaction
+ * - [0] Fecha en formato AAAA-mm-DD
+ * - [1] Codigo  de cuenta-desde
+ * - [2] Codigo  de cuenta-hacia
+ * - [3] Valor de la transaccion
+ * - [4] Token utilizado
+ * - [5] Tipo de transaccion
+ * - [6] APPROVED/ DECLINED
+ */
+char *validate(char** param){
+
+   char    *msg = 0;    
+   time_t  trans_date;
+   time_t  today;
+   char    *p;
+   int     ok = 1;
+
+   // Ejemplo de una transaccion
+   // 2014-06-17,CA-1234567890,CC-2345678901,1000,TOKEN-123456789,DEBIT,APPROVED
+
+   // Fecha
+   // La fecha debe estar bien formada
+   // La fecha no puede ser futura
+   // La fecha no puede ser anterior a 1 aÃ±o
+   memset(&trans_date, 0, sizeof(struct tm));
+   p = strptime(param[0], "%Y-%m-%d", &trans_date);
+
+   if ( p == 0)
+   {
+      msg = "Fecha de transaccion invalida";
+      ok = 0;
+   }
+   else
+   {
+      time ( &today );
+      double seconds = difftime(trans_date, today);
+      if (seconds > 0)
+      {
+         msg ="Fecha de transaccion en el futuro";
+         ok = 0;
+      }
+      else 
+      {
+         seconds = difftime(today, trans_date);
+         if (seconds > 365*24*60*60)
+         {
+            msg = "Fecha de transaccion anterior a un anio";
+            ok = 0;
+         }
+      }
+   }
+
+   // Cuenta-desde
+   // La cuenta-desde debe existir en el maestro de cuentas
+   if (ok == 1 && 1)
+   {
+   }
+
+   // Cuenta-hacia
+   // La cuenta-hacia debe existir en el maestro de cuentas
+   // La cuenta-hacia debe ser diferente de la cuenta-desde
+   if (ok == 1 && 1)
+   {
+      int len = strlen(param[1]);
+      if (strncmp(param[1], param[2], len) == 0){
+         msg = "Cuenta-desde no puede ser igual a cuenta-hacia";
+         ok = 0;
+      }
+   }
+
+   // Token
+   // El token debe estar habilitado
+   if (ok == 1 && 1)
+   {
+   }
+   
+   // El valor no puede ser negativo ni cero
+   if (ok == 1 && atof(param[3] <= 0))
+   {
+	   msg = "El valor de la transaccion debe ser un numero positivo";
+	   ok = 0;
+   }
+
+   // Tipo de transaccion
+   // Debe ser DEBIT o CREDIT
+   if ( ok == 1 && strncmp(param[5], "DEBIT", 5) != 0 && strncmp(param[5], "CREDIT", 6) != 0)
+   {
+      msg = "Tipo de transaccion invalido. Debe ser    DEBIT /   CREDIT";
+      ok = 0;
+   }
+
+   // Approved
+   // Debe ser APPROVED o DECLINED
+   if ( ok == 1 && strncmp(param[6], "APPROVED", 8) != 0 && strncmp(param[5], "DECLINED", 8) != 0)
+   {
+      msg = "Aprobacion invalida. Debe ser    APPROVED /   DECLINED";
+      ok = 0;
+   }
+
+   return msg;
+} // validate
+
 
 /***********************************************************************
  * Method for insert rows in the database
@@ -105,8 +216,8 @@ int insertTransaction(char *fromAccount, char *toAccount, char *value, char *tok
 	char *table = "transactions";
 
 	// Query example: INSERT INTO transactions VALUES (null, '1234567890', '2345678901', 1000, 'TOKEN-123456789', 2014-06-21, 99, 1)
-	sprintf(queryString, "INSERT INTO %s VALUES (null, %s, %s, %d, %s, '%s', %d, %d)",
-         table, fromAccount, toAccount, atoi(value), token, getDate(), 99, atoi(type));
+	sprintf(queryString, "INSERT INTO %s VALUES (null, %d, %d, %d, %s, '%d', %d, %d)",
+         table, atoi(fromAccount), atoi(toAccount), atoi(value), token, 1401596496, 99, atoi(type));
 	if (mysql_query(connector, queryString)) {
 		fprintf(stderr, "%s\n", mysql_error(connector));
 		return 2;
@@ -150,13 +261,13 @@ int searchTokenIfUser(char *token) {
 	char *table = "user_token";
 
 	sprintf(queryString, "SELECT %s FROM %s WHERE token_id = '%s'", column, table, token);
-	printf(queryString);
+	//printf(queryString);
 	if (mysql_query(connector, queryString)) {
 		fprintf(stderr, "%s\n", mysql_error(connector));
 		return 2;
 	}
 	resultSet = mysql_use_result(connector);
-	printf("\nToken %s: %s", token, resultSet);
+	//printf("\nToken %s: %s", token, resultSet);
 
 	// Free resources
 	mysql_free_result(resultSet);
@@ -174,17 +285,17 @@ int main (int argc, char *argv[]) {
     char **param = (char **)malloc( sizeof( char *) * 5);
     char *p, *q;
     int  i = 0;
-    file = fopen("movements.txt", "rt");
+    file = fopen("/home/samurai/Developer/secure-code-project/parsing/movements.txt", "rt");
     if (file == NULL) {
         printf("Archivo inexistente!\n");
         exit(1);
     }
 
-	searchTokenIfUser("2G2ngqt8sjYNtJ8");
+	//searchTokenIfUser("2G2ngqt8sjYNtJ8");
 	
     while (!feof(file)) {
         fgets(line, 80, file);
-        //printf("%s", line);
+        printf("%s", line);
 
         p = q = line;
         for (i = 0; i < 5; i ++) {
@@ -192,10 +303,10 @@ int main (int argc, char *argv[]) {
         }
 
         // Aquí validar todos  los parámetros y proteger contra SQLi
-        //insertTransaction(param[0], param[1], param[2], param[3], param[4]);
+        insertTransaction(param[0], param[1], param[2], param[3], param[4]);
 
-        //for (i = 0; i < 5; i ++)
-            //printf("%s\n", param[i]);
+        for (i = 0; i < 5; i ++)
+            printf("%s\n", param[i]);
 
         for (i = 0; i < 5; i ++)
             free(param[i]);
