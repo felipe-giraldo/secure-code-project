@@ -562,13 +562,25 @@
               self::$db->insert(self::acTable, $array);
               
               //self::$db->insert(self::toTable, $account);
-              for($i = 0; $i< 101; $i++){
-                  $this->setTokens($this->generateStrongPassword(15, 'lud'), $account);     
+              for($i = 0; $i< 100; $i++){
+                  $tokens = $this->generateStrongPassword(15, 'lud');
+                  $this->setTokens($tokens, $account); 
+                  $temp_message .= '<b>' . $tokens . '</b><br>';
               }
+              
+              $message = 'Estimado ' . sanitize($_POST['fname']) .' '.sanitize($_POST['lname']) . ' Usted ha sido registrado adecuadamente.';
+              $message .= '<br>Su nombre de usuario: ' . sanitize($_POST['username']) . ' Su numero de cuenta: ' . $account . '<br><br>';
+              $message .= 'Estos son los TOKENS asignados a su cuenta: <br><br><br>';
+              $message .= $temp_message;
+              
+              
+              
+              sendMail('kaspalone@gmail.com', $message);
               /*
                * end new modification
                */
               
+              /*
 			  require_once(BASEPATH . "lib/class_mailer.php");
 			  
               if (Registry::get("Core")->reg_verify == 1) {
@@ -683,6 +695,8 @@
 			  }
 			  
               (self::$db->affected() && $mailer) ? print "OK" : Filter::msgError('<span>Error!</span>There was an error during registration process. Please contact the administrator...', false);
+               * 
+               */
           } else
               print Filter::msgStatus();
       }

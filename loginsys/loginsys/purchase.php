@@ -3,237 +3,22 @@
   if (!defined("_VALID_PHP"))
       die('Direct access to this location is not allowed.');
 ?>
-<?php switch(Filter::$action): case "edit": ?>
-<?php $row = Core::getRowById(Users::uTable, Filter::$id);?>
-<p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i> Here you can update your user info<br>
-  Fields marked <i class="icon-append icon-asterisk"></i> are required.</p>
-<form class="xform" id="admin_form" method="post">
-  <header>User Manager<span>Editing Current User <i class="icon-double-angle-right"></i> <?php echo $row->username;?></span></header>
-  <div class="row">
-    <section class="col col-6">
-      <label class="input state-disabled"> <i class="icon-prepend icon-user"></i> <i class="icon-append icon-asterisk"></i>
-        <input type="text" disabled="disabled" name="username" readonly="readonly" value="<?php echo $row->username;?>" placeholder="Username">
-      </label>
-      <div class="note note-error">Username</div>
-    </section>
-    <section class="col col-6">
-      <label class="input"> <i class="icon-prepend icon-lock"></i> <i class="icon-append icon-asterisk"></i>
-        <input type="text" name="password" placeholder="password">
-      </label>
-      <div class="note note-info">Leave it empty unless changing the password</div>
-    </section>
-  </div>
-  <div class="row">
-    <section class="col col-4">
-      <label class="input"> <i class="icon-prepend icon-envelope-alt"></i> <i class="icon-append icon-asterisk"></i>
-        <input type="text" name="email" value="<?php echo $row->email;?>" placeholder="Email">
-      </label>
-      <div class="note note-error">Email</div>
-    </section>
-    <section class="col col-4">
-      <label class="input"> <i class="icon-prepend icon-user"></i>
-        <input type="text" name="fname" value="<?php echo $row->fname;?>" placeholder="First Name">
-      </label>
-      <div class="note note-error">First Name</div>
-    </section>
-    <section class="col col-4">
-      <label class="input"> <i class="icon-prepend icon-user"></i>
-        <input type="text" name="lname" value="<?php echo $row->lname;?>" placeholder="Last Name">
-      </label>
-      <div class="note note-error">Last Name</div>
-    </section>
-  </div>
-  <div class="row">
-    <section class="col col-4">
-      <select name="userlevel">
-        <?php echo $user->getUserLevels($row->userlevel);?>
-      </select>
-      <div class="note">Userlevel <i class="icon-exclamation-sign  tooltip" data-title="Userlevels 2-7 are custom groups, they have the same rights as registered users,but can access diferent pages based on their userlevel."></i></div>
-    </section>
-    <section class="col col-5">
-      <div class="inline-group">
-        <label class="radio">
-          <input type="radio" name="active" value="y" <?php getChecked($row->active, "y"); ?>>
-          <i></i>Active</label>
-        <label class="radio">
-          <input type="radio" name="active" value="n" <?php getChecked($row->active, "n"); ?>>
-          <i></i>Inactive</label>
-        <label class="radio">
-          <input type="radio" name="active" value="b" <?php getChecked($row->active, "b"); ?>>
-          <i></i>Banned</label>
-        <label class="radio">
-          <input type="radio" name="active" value="t" <?php getChecked($row->active, "t"); ?>>
-          <i></i>Pending</label>
-      </div>
-      <div class="note">User Status</div>
-    </section>
-    <section class="col col-3">
-      <div class="inline-group">
-        <label class="radio">
-          <input type="radio" name="newsletter" value="1" <?php getChecked($row->newsletter, 1); ?>>
-          <i></i>Yes</label>
-        <label class="radio">
-          <input type="radio" name="newsletter" value="0" <?php getChecked($row->newsletter, 0); ?>>
-          <i></i>No</label>
-      </div>
-      <div class="note">Newsletter Subscriber</div>
-    </section>
-  </div>
-  <div class="row">
-    <section class="col col-4">
-      <label class="input">
-        <input name="avatar" type="file" class="fileinput"/>
-      </label>
-      <div class="note">User Avatar</div>
-    </section>
-    <section class="col col-4"> <img src="../thumbmaker.php?src=<?php echo UPLOADURL;?><?php echo ($row->avatar) ? $row->avatar : "blank.png";?>&amp;w=40&amp;h=40&amp;s=1&amp;a=t1" alt="" title="" class="avatar" /> </section>
-  </div>
-  <div class="row">
-    <section class="col col-4">
-      <label class="input state-disabled"> <i class="icon-prepend icon-calendar"></i>
-        <input type="text" name="created" disabled="disabled" readonly="readonly" value="<?php echo $row->created;?>" placeholder="Email">
-      </label>
-      <div class="note">Registration Date:</div>
-    </section>
-    <section class="col col-4">
-      <label class="input state-disabled"> <i class="icon-prepend icon-calendar"></i>
-        <input type="text" name="lastlogin" disabled="disabled" readonly="readonly" value="<?php echo $row->lastlogin;?>" placeholder="First Name">
-      </label>
-      <div class="note">Last Login</div>
-    </section>
-    <section class="col col-4">
-      <label class="input state-disabled"> <i class="icon-prepend icon-laptop"></i>
-        <input type="text" name="lastip" disabled="disabled" readonly="readonly" value="<?php echo $row->lastip;?>" placeholder="Last Name">
-      </label>
-      <div class="note">Last Login IP</div>
-    </section>
-  </div>
-  <hr />
-  <div class="row">
-    <section class="col col-12">
-      <label class="textarea">
-        <textarea name="notes" placeholder="User Notes" rows="3"><?php echo $row->notes;?></textarea>
-      </label>
-      <div class="note note">User Notes - For internal use only.</div>
-    </section>
-  </div>
-  <footer>
-    <button class="button" name="dosubmit" type="submit">Update User Profile<span><i class="icon-ok"></i></span></button>
-    <a href="index.php?do=users" class="button button-secondary">Cancel</a> </footer>
-  <input name="username" type="hidden" value="<?php echo $row->username;?>" />
-  <input name="id" type="hidden" value="<?php echo Filter::$id;?>" />
-</form>
-<?php echo Core::doForm("processUser");?>
-<?php break;?>
-<?php case"add": ?>
-<p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i> Here you can add new user<br>
-  Fields marked <i class="icon-append icon-asterisk"></i> are required.</p>
-<form class="xform" id="admin_form" method="post">
-  <header>User Manager<span>Adding New User</span></header>
-  <div class="row">
-    <section class="col col-6">
-      <label class="input"> <i class="icon-prepend icon-user"></i> <i class="icon-append icon-asterisk"></i>
-        <input type="text" name="username" placeholder="Username">
-      </label>
-      <div class="note note-error">Username</div>
-    </section>
-    <section class="col col-6">
-      <label class="input"> <i class="icon-prepend icon-lock"></i> <i class="icon-append icon-asterisk"></i>
-        <input type="text" name="password" placeholder="password">
-      </label>
-      <div class="note note-error">Password</div>
-    </section>
-  </div>
-  <div class="row">
-    <section class="col col-4">
-      <label class="input"> <i class="icon-prepend icon-envelope-alt"></i> <i class="icon-append icon-asterisk"></i>
-        <input type="text" name="email" placeholder="Email">
-      </label>
-      <div class="note note-error">Email</div>
-    </section>
-    <section class="col col-4">
-      <label class="input"> <i class="icon-prepend icon-user"></i>
-        <input type="text" name="fname" placeholder="First Name">
-      </label>
-      <div class="note note-error">First Name</div>
-    </section>
-    <section class="col col-4">
-      <label class="input"> <i class="icon-prepend icon-user"></i>
-        <input type="text" name="lname" placeholder="Last Name">
-      </label>
-      <div class="note note-error">Last Name</div>
-    </section>
-  </div>
-  <hr>
-  <div class="row">
-    <section class="col col-4">
-      <select name="userlevel">
-        <?php echo $user->getUserLevels();?>
-      </select>
-      <div class="note">Userlevel <i class="icon-exclamation-sign  tooltip" data-title="Userlevels 2-7 are custom groups, they have the same rights as registered users,but can access diferent pages based on their userlevel."></i></div>
-    </section>
-    <section class="col col-5">
-      <div class="inline-group">
-        <label class="radio">
-          <input name="active" type="radio" value="y" checked="checked" >
-          <i></i>Active</label>
-        <label class="radio">
-          <input type="radio" name="active" value="n" >
-          <i></i>Inactive</label>
-        <label class="radio">
-          <input type="radio" name="active" value="b" >
-          <i></i>Banned</label>
-        <label class="radio">
-          <input type="radio" name="active" value="t">
-          <i></i>Pending</label>
-      </div>
-      <div class="note">User Status</div>
-    </section>
-    <section class="col col-3">
-      <div class="inline-group">
-        <label class="radio">
-          <input name="newsletter" type="radio" value="1" checked="checked">
-          <i></i>Yes</label>
-        <label class="radio">
-          <input type="radio" name="newsletter" value="0" >
-          <i></i>No</label>
-      </div>
-      <div class="note">Newsletter Subscriber</div>
-    </section>
-  </div>
-  <div class="row">
-    <section class="col col-4">
-      <label class="input">
-        <input name="avatar" type="file" class="fileinput"/>
-      </label>
-      <div class="note">User Avatar</div>
-    </section>
-    <section class="col col-3">
-      <label class="checkbox">
-        <input type="checkbox" name="notify" value="1">
-        <i></i>Notify User</label>
-      <div class="note note-info">Send welcome email to this user</div>
-    </section>
-  </div>
-  <div class="row">
-    <section class="col col-12">
-      <label class="textarea">
-        <textarea name="notes" placeholder="User Notes" rows="3"></textarea>
-      </label>
-      <div class="note note">User Notes - For internal use only.</div>
-    </section>
-  </div>
-  <footer>
-    <button class="button" name="dosubmit" type="submit">Add User<span><i class="icon-ok"></i></span></button>
-    <a href="index.php?do=users" class="button button-secondary">Cancel</a> </footer>
-</form>
-<?php echo Core::doForm("processUser");?>
-<?php break;?>
-<?php default:?>
+
 <?php $userrow = $user->getUsers();
     $useraccounts = $core->getAccounts();
     //$vendors = $core->getVendors();
 ?>
+<?php //echo Core::doForm("processTransfer","ajax/controller_tr.php");
+    if (isset($_POST['btnTransfer'])):
+        $row = $user->getUserData();
+        $core->makeTransfer($row->id, 2);
+        //haceTransfer($row->id, $_POST['t_token'], $_POST['origin_account'], $_POST['destination_account'], $_POST['ammount']);
+        //redirect_to("main.php?do=transactions");
+    endif;
+    if (isset($_POST['btnCancel'])):
+        redirect_to("account.php");
+    endif;
+?> 
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i>Here you can transfer money to other accounts <br />
   The destination account must be linked to your main account in order to make the transfer.</p>
 <section class="widget">
@@ -248,7 +33,7 @@
       <div class="ptop30">
         <form class="xform" id="dForm" method="post" style="padding:0;">
           <section class="col col-6">
-            <select name="select" id="userfilter">
+            <select name="origin_account" id="userfilter">
               <option value="NA">--- Debit to Account ---</option>
               <?php foreach($useraccounts as $accounts): ?>
               <option value='<?php echo $accounts->id_account; ?>'><?php echo $accounts->id_account; ?></option>
@@ -256,7 +41,7 @@
             </select>
           </section>
           <section class="col col-6">
-            <select name="select" id="userfilter">
+            <select name="destination_account" id="userfilter">
               <option value="NA">--- Select vendor ---</option>
               <?php foreach($useraccounts as $accounts): ?>
               <option value='<?php echo $accounts->id_account; ?>'><?php echo $accounts->id_account; ?></option>
@@ -277,7 +62,7 @@
           </section>
             <section class="col col-4">
             <button class="button inline" name="btnTransfer" type="submit">Purchase<span><i class="icon-chevron-right"></i></span></button>
-            <button class="button inline" name="btnCancel" type="submit">Cancel<span><i class="icon-chevron-right"></i></span></button>
+            <button class="button button-red  inline" name="btnCancel" type="submit">Cancel<span><i class="icon-chevron-right"></i></span></button>
           </section>
           <div class="hr2"></div>
           
@@ -286,7 +71,7 @@
     </div>
     <?php echo $pager->display_pages();?> </div>
 </section>
-<?php echo Core::doDelete("Delete User","deleteUser");?> 
+
 <script type="text/javascript"> 
 // <![CDATA[
 $(document).ready(function () {
@@ -364,5 +149,3 @@ $(document).ready(function () {
 });
 // ]]>
 </script>
-<?php break;?>
-<?php endswitch;?>

@@ -377,7 +377,7 @@
 		  $display = '<span class="tbicon"><a class="tooltip" data-title="No"><i class="icon-time"></i></a></span>';
 	  }
 
-      return $display;;
+      return $display;
   }
 
   
@@ -434,5 +434,84 @@ function generateTransactionCodes($length, $dashes, $char_set)
 	}
 	$dash_str .= $password;
 	return $dash_str;
+}
+
+function sendMail($email, $array)
+{
+    require_once("class.phpmailer.php");
+    require_once("class.smtp.php");
+
+    global $error;
+    $mail = new PHPMailer();
+    $mail->IsSMTP();
+    $mail->SMTPDebug = 2;       				// 1 = Mostrar errores y mensajes, 2 = Sólo mostrar mensajes
+    $mail->SMTPAuth = true;   					// Se determina que el servidor SMTP requiere autenticación
+    $mail->SMTPSecure = "ssl"; 					// Gmail requiere una conexión segura por lo que se especifica ssl
+    $mail->Host = "smtp.gmail.com";         	// Dirección donde se encuentra el servidor de correo SMTP
+    $mail->Port = 465;                      	// Puesto al que se deberá conectar el cliente en el servidor
+    $mail->Username = 'pruebasuniandes0@gmail.com'; // Usuario con el que se realizará la autenticación
+    $mail->Password = "Uniandes2014"; 				// Clave para realizar la autenticación en el servidor
+
+    // Configuración propia del mensaje de correo que se desea enviar 
+    $mail->From = 'secureCoding@gmail.com'; 
+    $mail->FromName = "Nombre del Remitente"; 
+    $mail->Subject = "Prueba Envio de Correos";
+    $mail->AltBody = "Este es un mensaje de prueba."; 
+    $mail->MsgHTML($array); 
+    $mail->IsHTML(true);
+    $mail->AddAddress($email, "Destinatario");
+    // Se tiene la posibilidad de enviar tambien un archivo adjunto
+    //$mail->AddAttachment("archivos/phpmailer0.9.zip");      
+
+    /*
+    if(!$mail->Send()) {
+        echo "Error: " . $mail->ErrorInfo;
+    }else {
+        echo "Mensaje enviado correctamente";
+    }
+     * 
+     */
+}
+
+function haceTransfer($user, $token, $origen, $destino, $cantidad)
+{
+    //echo "cargando -> conexion/conexion.php <br />";
+    define ('DB_USER', 'advlogin');
+    //define ('DB_PASSWORD', 'ecasasp0822');
+    define ('DB_PASSWORD', 'Hard+20.');
+    define ('DB_HOST', 'localhost');
+    define ('DB_NAME', 'advlogin');
+
+    $dbc = @mysqli_connect (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' .mysqli_connect_error() );
+    
+    // verificamos si el token es valido
+    $sql = "SELECT *
+            FROM user_token u INNER JOIN account a
+            WHERE u.user_id = a.id_account
+            AND a.id_user = $user
+            AND u.token_id LIKE '$token'
+            AND u.used = 0";
+    
+    $result = @mysqli_query ($dbc, $sql);
+    if (mysqli_num_rows($result) > 0){
+        $sql = "SELECT *
+            FROM account a
+            WHERE a.id_account = $origen
+            AND a.id_user = $user
+            AND a.money > $cantidad
+            AND a.active = 1";
+        $result = @mysqli_query ($dbc, $sql);
+        if (mysqli_num_rows($result) > 0){
+            $sql = "UPDATE account SET money = money - $ammount WHERE id_account = $origen";
+            $result = @mysqli_query ($dbc, $sql);
+            
+            $sql = "UPDATE account SET money = money + $ammount WHERE id_account = $origen";
+            $result = @mysqli_query ($dbc, $sql);
+            
+            $sql = "UPDATE user_token SET used = 1 WHERE token_id LIKE " . $token;
+            $result = @mysqli_query ($dbc, $sql);
+            
+        }
+    }
 }
 ?>

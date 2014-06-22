@@ -316,9 +316,13 @@
           return ($row) ? $row : 0;
       }
       
-      public function getTransactions()
+      public function getTransactions($user)
       {
-          $sql = "SELECT * FROM " . self::trTable;
+          $sql = "SELECT * FROM " . self::trTable . " WHERE ";
+          $sql = "SELECT * 
+                FROM " . self::trTable . " t INNER JOIN " . self::acTable . " a
+                WHERE t.from_account = a.id_account
+                AND a.id_user = " . $user;
           $row = self::$db->fetch_all($sql);
           
           return ($row) ? $row : 0;
@@ -349,72 +353,201 @@
           return ($row) ? $row : 0;
       }
       
-      public function getAccounts($user)
+      public function checkTransaction($transaction_id)
       {
+          $sql = "SELECT * FROM " . self::trTable . " WHERE id = " . $transaction_id;
+          $row = self::$db->first($sql);
+          
+          return ($row) ? $row : 0;
+      }
+      
+      public function rejectTransaction($transaction_id)
+      {
+          $data = array(
+                    'transaction_state' => 2
+            );
+            self::$db->update(self::trTable, $data, "id = '" . $transaction_id . "'");      //we update the transaction state
+      }
+      
+      public function getAccounts()
+      {
+          /*
           if(!empty($user)):
               $sql = "SELECT * FROM " . self::acTable . " WHERE id_user = " . $user;
           else:
               $sql = "SELECT * FROM " . self::acTable;
           endif;
+           * 
+           */
+          
+          $sql = "SELECT * FROM " . self::acTable;
           
           $row = self::$db->fetch_all($sql);
           
           return ($row) ? $row : 0;
       }
       
-      public function makeTransfer($type){
-          if(empty($_POST['origin_account'])):
+      public function checkValidToken($token, $user)
+      {
+          
+          $sql = "SELECT *
+            FROM " . self::toTable . " u INNER JOIN " . self::acTable . " a
+            WHERE u.user_id = a.id_account
+            AND a.id_user = $user
+            AND u.token_id LIKE '$token'
+            AND u.used = 0";
+          
+          $row = self::$db->first($sql);
+          
+          return ($row) ? $row : 0;
+      }
+      
+      public function checkFunds($account, $ammount)
+      {
+          
+          $sql = "SELECT *
+            FROM " . self::acTable ." a
+            WHERE a.id_account = " . $account . "
+            -- AND a.money > " . $ammount . "
+            AND a.active = 1";
+          
+          //$row = self::$db->fetchrow($sql);
+          $row = self::$db->first($sql);
+          
+          //return ($row) ? $row : 0;
+          //echo $sql . "<br>";
+          return ($row) ? $row : 0;
+          //return $sql;
+      }
+      
+      public function updateAccount($account, $ammount, $operation)
+      {
+          if($operation == 1):
+              $data = array ('money' => 'money + ' . $ammount);
+          else:
+              $data = array ('money' => 'money - ' . $ammount);
+          endif;
+          self::$db->update(self::acTable, $data, "id_account='" . $account . "'");
+          
+      }
+      
+      public function makeTransfer($userID, $type, $origin=false, $destination=false, $ammount=false, $token=false, $approval = false, $transaction_id = false){
+          if(!$origin):
+                $origin = sanitize($_POST['origin_account']);
+          endif;
+          if(!$destination):
+                $destination = sanitize($_POST['destination_account']);
+          endif;
+          if(!$ammount):
+                $ammount = sanitize($_POST['ammount']);
+          endif;
+          if(!$token):
+                $token = sanitize($_POST['t_token']);
+          endif;
+          
+          if(empty($origin)):
               Filter::$msgs['origin_account'] = 'Please select an account to get the funds from.';
           endif;
           
-          if(empty($_POST['destination_account'])):
+          if(empty($destination)):
               Filter::$msgs['destination_account'] = 'Please select an account to transfer the funds to.';
           endif;
           
-          if($_POST['destination_account'] == $_POST['origin_account']):
+          if($destination == $origin):
               Filter::$msgs['destination_account'] = 'The destination account cannot be the same than the origin account';
           endif;
           
-          if(empty($_POST['ammount'])):
-              Filter::$msgs['ammoun'] = 'Please insert the ammount to transfer';
+          if(empty($ammount)):
+              Filter::$msgs['ammount'] = 'Please insert the ammount to transfer';
           endif;
-          if(to_int($_POST['ammount']) <= 0):
+          if($ammount <= 0):
               Filter::$msgs['ammount'] = 'Please insert a number greater than Zero for the transfering ammount.';
           endif;
-          if(to_int($_POST['ammount']) >= 10000):
+          if($ammount >= 10000):
               $state = 99;
           else:
               $state = 1;
           endif;
           
-          if(empty($_POST['t_token']) or strlen($_POST['t_token'])):
-              Filter::$msgs['t_token'] = 'Please insert a valid token key';
+          if(!$approval):
+            if(empty($token) or strlen($token) < 15):
+                Filter::$msgs['t_token'] = 'Please insert a valid token key';
+            endif;
+
+            $valid_token = $this->checkValidToken(sanitize($token), $userID);
+            if($valid_token->used != 0) :
+                Filter::$msgs['t_token'] = 'Please insert a valid and available token key';
+            endif;
           endif;
           
-          $origin = sanitize($_POST['origin_account']);
-          $destination = sanitize($_POST['destination_account']);
-          $ammount = sanitize($_POST['ammount']);
-          $token = sanitize($_POST['t_token']);
+          $funds = self::checkFunds($origin, $ammount);
+          $funds_origin = $funds->money;
           
+          $funds2 = self::checkFunds($destination, $ammount);
+          $funds_destination = $funds2->money;
+          //Filter::$msgs['ammount'] = 'You dont have enough funds to make this transfer ' . $funds . " " . $funds2;
           
-          $data = array(
-					  'from_account' => sanitize($_POST['origin_account']), 
-					  'to_account' => sanitize($_POST['destination_account']),
-					  'ammount' => sanitize($_POST['ammount']), 
-					  'token' => sanitize($_POST['t_token']),
-					  'transaction_date' => "NOW()",
-					  'transaction_state' => $state,
-					  'transaction_type' => $type
-			  );
-			  
-          self::$db->insert(self::trTable, $data);
+          /*
+          echo "Origen: " . $funds_origin . " Destino: " . $funds_destination . 
+              "<br>" . "Cuenta origen: " . $origin . " Cuenta Destino: " . $destination . 
+              "<br>Cantidad: " . $ammount . "<br>" . $token . " Tamanho" . strlen($token);
+           * 
+           */
+          
+          if($funds->money < $ammount) :
+              Filter::$msgs['ammount'] = 'You dont have enough funds to make this transfer / payment';
+          endif;
+          if (empty(Filter::$msgs)):
+  
+            if(!$approval):
+                $data = array(
+                            'from_account' => sanitize($origin), 
+                            'to_account' => sanitize($destination),
+                            'ammount' => sanitize($ammount), 
+                            'token' => sanitize($token),
+                            'transaction_date' => "NOW()",
+                            'transaction_state' => $state,
+                            'transaction_type' => $type
+                    );
+                $data_token = array ('used' => 1);
+
+                self::$db->insert(self::trTable, $data);
+            else:
+                    $data = array(
+                            'transaction_state' => 1
+                    );
+                    self::$db->update(self::trTable, $data, "id = '" . $transaction_id . "'");      //we update the transaction state
+                    $state = 1;
+                    
+            endif;
+            if($state == 1):
+                
+                $funds_origin = $funds_origin - $ammount;
+                $funds_destination = $funds_destination + $ammount;
+                //self::updateAccount($origin, $ammount, 99);         //we debit the money
+                $data = array ('money' => $funds_origin);
+                self::$db->update(self::acTable, $data, "id_account='" . $origin . "'");
+
+                $data = array ('money' => $funds_destination);
+                self::$db->update(self::acTable, $data, "id_account='" . $destination . "'");
+                //self::updateAccount($destination, $ammount, 1);          //we deposit the money on the destination account
+                self::$db->update(self::toTable, $data_token, "token_id LIKE '" . $token . "'");      //we discard the token
+                 
+                 
+            endif;
+          else:
+			  print Filter::msgStatus();
+          endif;
       }
       
       
       
-      public function getTokens()
+      public function getTokens($user)
       {
-          $sql = "SELECT * FROM " . self::toTable;
+          $sql = "SELECT * 
+            FROM user_token u INNER JOIN account a
+            ON u.user_id = a.id_account
+            AND a.id_user = $user ORDER BY u.used ";
           $row = self::$db->fetch_all($sql);
           
           return ($row) ? $row : 0;
