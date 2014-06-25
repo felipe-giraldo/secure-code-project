@@ -3,8 +3,11 @@
   define("_VALID_PHP", true);
   require_once("init.php");
   
-  if ($user->logged_in)
+  if (!$user->logged_in)
       redirect_to("account.php");
+  else {
+      redirect_to("index.php");
+}
 ?>
 <?php include("header.php");?>
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i> Here you can activate your account. Please enter your email address and activation code received.<br>

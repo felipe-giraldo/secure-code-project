@@ -457,7 +457,7 @@
               Filter::$msgs['destination_account'] = 'The destination account cannot be the same than the origin account';
           endif;
           
-          if(empty($ammount)):
+          if(empty($ammount) or !is_numeric($ammount)):
               Filter::$msgs['ammount'] = 'Please insert the ammount to transfer';
           endif;
           if($ammount <= 0):
@@ -475,7 +475,8 @@
             endif;
 
             $valid_token = $this->checkValidToken(sanitize($token), $userID);
-            if($valid_token->used != 0) :
+            $v_token = $valid_token->used;
+            if($v_token != 0 or !is_numeric($v_token)) :
                 Filter::$msgs['t_token'] = 'Please insert a valid and available token key';
             endif;
           endif;
@@ -488,11 +489,16 @@
           //Filter::$msgs['ammount'] = 'You dont have enough funds to make this transfer ' . $funds . " " . $funds2;
           
           /*
-          echo "Origen: " . $funds_origin . " Destino: " . $funds_destination . 
+          echo "Fondos Origen: " . $funds_origin . " Fondos Destino: " . $funds_destination . 
               "<br>" . "Cuenta origen: " . $origin . " Cuenta Destino: " . $destination . 
-              "<br>Cantidad: " . $ammount . "<br>" . $token . " Tamanho" . strlen($token);
+              "<br>Cantidad: " . $ammount . "<br> Token: " . $token . " Tamanho: " . strlen($token) . 
+              " Token usado: " . $v_token . " UserID: " . $userID .
+              "<br> es numerico: " . is_numeric($v_token) . " Es set: " . is_null($v_token);
            * 
            */
+           
+           
+           
           
           if($funds->money < $ammount) :
               Filter::$msgs['ammount'] = 'You dont have enough funds to make this transfer / payment';

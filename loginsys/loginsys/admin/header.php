@@ -1,5 +1,6 @@
 <?php
- 
+  if (!$user->logged_in)
+      redirect_to("index.php");
   
   if (!defined("_VALID_PHP"))
       die('Direct access to this location is not allowed.');
@@ -55,6 +56,7 @@
           <li><a href="index.php?do=users" title="User Management"><i class="icon-user"></i> User Management</a></li>
           <li><a href="index.php?do=news" title="News Manager"><i class="icon-file-text-alt"></i> News Manager</a></li>
           <li><a href="index.php?do=transactions_pa" title="Trans-Approval"><i class="icon-file-text-alt"></i> Transaction Approval</a></li>
+          <li><a href="../index.php" title="Go back"><i class="icon-file-text-alt"></i> User section</a></li>
           
           
           

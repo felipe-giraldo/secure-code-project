@@ -3,8 +3,8 @@
   define("_VALID_PHP", true);
   require_once("init.php");
 
-  if ($user->logged_in)
-      redirect_to("account.php");
+ // if ($user->logged_in)
+ //     redirect_to("account.php");
 	  
    $numusers = countEntries("users");
 ?>
@@ -23,13 +23,13 @@
 	<div class="row">
 	  <section class="col col-6">
 		<label class="input"> <i class="icon-prepend icon-user"></i> <i class="icon-append icon-asterisk"></i>
-		  <input type="text" name="username" placeholder="Username">
+		  <input type="text" name="username" class="validate[required, minSize[6]]" placeholder="Username">
 		</label>
 		<div class="note note-error">Username</div>
 	  </section>
 	  <section class="col col-6">
 		<label class="input"> <i class="icon-prepend icon-envelope-alt"></i> <i class="icon-append icon-asterisk"></i>
-		  <input type="text" name="email" placeholder="Email">
+		  <input type="text" name="email" class="validate[required, minSize[8], custom[email]]" placeholder="Email">
 		</label>
 		<div class="note note-error">Email</div>
 	  </section>
@@ -37,27 +37,27 @@
 	<div class="row">
 	  <section class="col col-6">
 		<label class="input"> <i class="icon-prepend icon-user"></i> <i class="icon-append icon-asterisk"></i>
-		  <input type="password" name="pass" placeholder="Password">
+		  <input type="password" name="pass" class="validate[required, minSize[8]]" placeholder="Password">
 		</label>
 		<div class="note note-error">Password</div>
 	  </section>
 	  <section class="col col-6">
 		<label class="input"> <i class="icon-prepend icon-lock"></i> <i class="icon-append icon-asterisk"></i>
-		  <input type="password" name="pass2" placeholder="Repeat Password">
+		  <input type="password" name="pass2" class="validate[required, minSize[8]]"  placeholder="Repeat Password">
 		</label>
-		<div class="note note-error">Repeat Password <i class="icon-exclamation-sign tooltip" data-title="Password must be at least 6 characters long."></i></div>
+		<div class="note note-error">Repeat Password <i class="icon-exclamation-sign tooltip" data-title="Password must be at least 8 characters long."></i></div>
 	  </section>
 	</div>
 	<div class="row">
 	  <section class="col col-4">
-		<label class="input"> <i class="icon-prepend icon-envelope-alt"></i> <i class="icon-append icon-asterisk"></i>
-		  <input type="text" name="fname" placeholder="First Name">
+		<label class="input"> <i class="icon-prepend icon-user"></i> <i class="icon-append icon-asterisk"></i>
+		  <input type="text" name="fname" class="validate[required, minSize[3]]" placeholder="First Name">
 		</label>
 		<div class="note note-error">First Name</div>
 	  </section>
 	  <section class="col col-4">
 		<label class="input"> <i class="icon-prepend icon-user"></i> <i class="icon-append icon-asterisk"></i>
-		  <input type="text" name="lname" placeholder="Last Name">
+		  <input type="text" name="lname" class="validate[required, minSize[3]]"  placeholder="Last Name">
 		</label>
 		<div class="note note-error">Last Name</div>
 	  </section>

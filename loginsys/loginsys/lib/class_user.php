@@ -499,8 +499,8 @@
 		  if (empty($_POST['pass']))
 			  $this->msgs['pass'] = 'Please Enter Valid Password.';
 		  
-		  if (strlen($_POST['pass']) < 6)
-			  Filter::$msgs['pass'] = 'Password is too short (less than 6 characters long)';
+		  if (strlen($_POST['pass']) < 8)
+			  Filter::$msgs['pass'] = 'Password is too short (less than 8 characters long)';
 		  elseif (!preg_match("/^[a-z0-9_-]{6,15}$/", ($_POST['pass'] = trim($_POST['pass']))))
 			  Filter::$msgs['pass'] = 'Password entered is not alphanumeric.';
 		  elseif ($_POST['pass'] != $_POST['pass2'])
@@ -561,7 +561,7 @@
                   
               self::$db->insert(self::acTable, $array);
               
-              //self::$db->insert(self::toTable, $account);
+              self::$db->insert(self::toTable, $account);
               for($i = 0; $i< 100; $i++){
                   $tokens = $this->generateStrongPassword(15, 'lud');
                   $this->setTokens($tokens, $account); 

@@ -1,11 +1,11 @@
 <?php
-  
-  
+    
   if (!defined("_VALID_PHP"))
       die('Direct access to this location is not allowed.');
 	  
 	  $news = $core->renderNews();
 ?>
+
 <!DOCTYPE html>
 <!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
 <!--[if (gte IE 9)|!(IE)]><!-->
@@ -28,6 +28,18 @@
 <script src="assets/js/custom.js"></script>
 <script src="assets/js/modernizr.mq.js" type="text/javascript" ></script>
 <script src="assets/js/checkbox.js"></script>
+
+<!-- Validation Engine -->
+<!--<script src="assets/jquery-1.8.2.min.js" type="text/javascript"></script>-->
+<script src="assets/languages/jquery.validationEngine-en.js" type="text/javascript" charset="utf-8"></script>
+<script src="assets/js/jquery.validationEngine.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" href="assets/validationEngine.jquery.css" type="text/css"/>
+
+<script type="text/javascript">
+$(document).ready(function(){
+   $("#dForm").validationEngine();
+});
+</script>
 </head>
 <body>
 <div id="loader" style="display:none"></div>

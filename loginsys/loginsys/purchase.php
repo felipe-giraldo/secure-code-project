@@ -1,4 +1,6 @@
 <?php
+  if (!$user->logged_in)
+      redirect_to("index.php");
   
   if (!defined("_VALID_PHP"))
       die('Direct access to this location is not allowed.');
@@ -33,7 +35,7 @@
       <div class="ptop30">
         <form class="xform" id="dForm" method="post" style="padding:0;">
           <section class="col col-6">
-            <select name="origin_account" id="userfilter">
+            <select name="origin_account" id="userfilter" class="validate[required]">
               <option value="NA">--- Debit to Account ---</option>
               <?php foreach($useraccounts as $accounts): ?>
               <option value='<?php echo $accounts->id_account; ?>'><?php echo $accounts->id_account; ?></option>
@@ -41,7 +43,7 @@
             </select>
           </section>
           <section class="col col-6">
-            <select name="destination_account" id="userfilter">
+            <select name="destination_account" id="userfilter2" class="validate[required]">
               <option value="NA">--- Select vendor ---</option>
               <?php foreach($useraccounts as $accounts): ?>
               <option value='<?php echo $accounts->id_account; ?>'><?php echo $accounts->id_account; ?></option>
@@ -50,13 +52,13 @@
           </section>
             <section class="col col-4">
             <label class="input"> <i class="icon-prepend icon-search"></i>
-              <input type="text" name="ammount"  id="search-input" placeholder="Item Value">
+              <input type="text" name="ammount"  id="search-input2" class="validate[required, custom[integer], min[0]]" placeholder="Item Value">
             </label>
             <div id="suggestions"></div>
           </section>
             <section class="col col-4">
             <label class="input"> <i class="icon-prepend icon-search"></i>
-              <input type="text" name="t_token"  id="search-input" placeholder="Token for transaction">
+              <input type="text" name="t_token"  class="validate[required, minSize[15], maxSize[15] ]" id="search-input" placeholder="Token for transaction">
             </label>
             <div id="suggestions"></div>
           </section>

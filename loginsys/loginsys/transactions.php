@@ -1,5 +1,7 @@
 <?php
- 
+  if (!$user->logged_in)
+      redirect_to("index.php");
+  
   if (!defined("_VALID_PHP"))
       die('Direct access to this location is not allowed.');
 ?>

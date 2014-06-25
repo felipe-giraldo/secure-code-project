@@ -8,6 +8,10 @@
   //if (!$user->is_Admin())
   //    redirect_to("login.php");
 ?>
+<?php
+  if (!$user->logged_in)
+      redirect_to("index.php");
+?>
 <?php include("header.php");?>
   <!-- Start Content-->
 <div class="wrap clearfix">

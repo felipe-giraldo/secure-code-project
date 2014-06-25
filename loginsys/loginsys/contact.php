@@ -3,6 +3,13 @@
   define("_VALID_PHP", true);
   require_once("init.php");
 ?>
+<?php
+  if (!$user->logged_in)
+      redirect_to("index.php");
+  
+  if (!defined("_VALID_PHP"))
+      die('Direct access to this location is not allowed.');
+?>
 <?php include("header.php");?>
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i> Feel free to send us an email with your enquiries, questions, or any feedback.<br />
   We will be very happy to answer your question. Use contact form below to send us quick email.</p>
