@@ -554,7 +554,7 @@
 					  'created' => "NOW()"
 			  );
 			  
-			  //self::$db->insert(self::uTable, $data);
+			  self::$db->insert(self::uTable, $data);
               
               
               
@@ -687,6 +687,8 @@
            self::$db->insert(self::acTable, $data);
 
            //self::$db->insert(self::toTable, $account);
+		   $temp_message = '';
+		   
            for($i = 0; $i< 100; $i++){
                //echo "<br>dentro del for ... " . $i;
                //$tokens = substr(SHA1(generateStrongPassword(15, 0, 'lud')), 0, 15);
@@ -697,7 +699,7 @@
            //echo "<br>Tokens: " . $temp_message;
 
            $message = 'Estimado <b>' . strtoupper($usr->fname) . ' ' . strtoupper($usr->lname) . '</b> Usted ha sido registrado adecuadamente.';
-           $message .= '<br><br>Su nombre de usuario: <b>' . sanitize($_POST['username']) . '</b><br> Su numero de cuenta: <b>' . $account . '</b><br><br>';
+           $message .= '<br><br>Su nombre de usuario: <b>' . sanitize($usr->username) . '</b><br> Su numero de cuenta: <b>' . $account . '</b><br><br>';
            $message .= '<br><br>Su PIN: <b>' . $pin . '</b>';
            $message .= '<br><br><br>Estos son los TOKENS asignados a su cuenta: <br><br><br>';
            $message .= $temp_message;
@@ -707,8 +709,8 @@
 
 
 
-           sendPHPMail('kaspalone@gmail.com', $message);        //debug
-           //sendPHPMail($usr->email, $message);
+           //sendPHPMail('kaspalone@gmail.com', $message);        //debug
+           sendPHPMail($usr->email, $message);
            /*
             * end new modification
             */
