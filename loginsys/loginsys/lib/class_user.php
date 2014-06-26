@@ -96,6 +96,12 @@
 	  public function login($username, $pass)
 	  {
 
+          if (empty($_POST['captcha']))
+			  Filter::$msgs['captcha'] = 'Please enter captcha code!';
+		  
+		  if ($_SESSION['captchacode'] != $_POST['captcha'])
+			  Filter::$msgs['captcha'] = "Entered captcha code is incorrect";
+          
 		  if ($username == "" && $pass == "") {
 			  Filter::$msgs['username'] = 'Please enter valid username and password.';
 		  } else {
@@ -520,6 +526,8 @@
 		  
 		  if ($_SESSION['captchacode'] != $_POST['captcha'])
 			  Filter::$msgs['captcha'] = "Entered captcha code is incorrect";
+          
+          //echo "Verificacion de filtros OK";        //debug
 		  
 		  if (empty(Filter::$msgs)) {
 
@@ -531,9 +539,10 @@
               } elseif (Registry::get("Core")->auto_verify == 0) {
                   $active = "n";
               } else {
-                  $active = "n";        //this one should be Y in regular cases.
+                  $active = "y";        
               }
 				  
+              //echo "<br>Pasamos los filtros, ahora a sanitizar entradas...";        //debug
 			  $data = array(
 					  'username' => sanitize($_POST['username']), 
 					  'password' => md5($_POST['pass']),
@@ -545,163 +554,15 @@
 					  'created' => "NOW()"
 			  );
 			  
-			  self::$db->insert(self::uTable, $data);
-              /**
-               * new modification
-               */
-              $user = $this->getUserInfo($_POST['username']);
-              
-              $account = $this->generateStrongPassword(10, 'd');
-              $array = array(
-                  'id_account' => $account,
-                  'id_user' => $user->id,
-                  'money' => 0,
-                  'active' => 1
-              );
-                  
-              self::$db->insert(self::acTable, $array);
-              
-              self::$db->insert(self::toTable, $account);
-              for($i = 0; $i< 100; $i++){
-                  $tokens = $this->generateStrongPassword(15, 'lud');
-                  $this->setTokens($tokens, $account); 
-                  $temp_message .= '<b>' . $tokens . '</b><br>';
-              }
-              
-              $message = 'Estimado ' . sanitize($_POST['fname']) .' '.sanitize($_POST['lname']) . ' Usted ha sido registrado adecuadamente.';
-              $message .= '<br>Su nombre de usuario: ' . sanitize($_POST['username']) . ' Su numero de cuenta: ' . $account . '<br><br>';
-              $message .= 'Estos son los TOKENS asignados a su cuenta: <br><br><br>';
-              $message .= $temp_message;
+			  //self::$db->insert(self::uTable, $data);
               
               
               
-              sendMail('kaspalone@gmail.com', $message);
-              /*
-               * end new modification
-               */
-              
-              /*
-			  require_once(BASEPATH . "lib/class_mailer.php");
-			  
-              if (Registry::get("Core")->reg_verify == 1) {
-                  $actlink = Registry::get("Core")->site_url . "/activate.php";
-                  $row = Registry::get("Core")->getRowById("email_templates", 1);
-				  
-                  $body = str_replace(array(
-                      '[NAME]',
-                      '[USERNAME]',
-                      '[PASSWORD]',
-                      '[TOKEN]',
-                      '[EMAIL]',
-                      '[URL]',
-                      '[LINK]',
-                      '[SITE_NAME]'), array(
-                      $data['fname'] . ' ' . $data['lname'],
-                      $data['username'],
-                      $_POST['pass'],
-                      $token,
-                      $data['email'],
-                      Registry::get("Core")->site_url,
-                      $actlink,
-                      Registry::get("Core")->site_name), $row->body);
-						
-				 $newbody = cleanOut($body);	
-					 
-				  $mailer = $mail->sendMail();
-                  $message = Swift_Message::newInstance()
-							->setSubject($row->subject)
-							->setTo(array($data['email'] => $data['username']))
-							->setFrom(array(Registry::get("Core")->site_email => Registry::get("Core")->site_name))
-							->setBody($newbody, 'text/html');
-
-                  $mailer->send($message);
-				 
-              } elseif (Registry::get("Core")->auto_verify == 0) {
-                  $row = Registry::get("Core")->getRowById("email_templates", 14);
-				  
-                  $body = str_replace(array(
-                      '[NAME]',
-                      '[USERNAME]',
-                      '[PASSWORD]',
-                      '[URL]',
-                      '[SITE_NAME]'), array(
-                      $data['fname'] . ' ' . $data['lname'],
-                      $data['username'],
-                      $_POST['pass'],
-                      Registry::get("Core")->site_url,
-                      Registry::get("Core") > site_name), $row->body);
-						
-				 $newbody = cleanOut($body);	
-
-				  $mailer = $mail->sendMail();
-                  $message = Swift_Message::newInstance()
-							->setSubject($row->subject)
-							->setTo(array($data['email'] => $data['username']))
-							->setFrom(array(Registry::get("Core")->site_email => Registry::get("Core")->site_name))
-							->setBody($newbody, 'text/html');
-							
-				 $mailer->send($message); 
-				  
-			  } else {
-				  $row = Registry::get("Core")->getRowById("email_templates", 7);
-				  
-                  $body = str_replace(array(
-                      '[NAME]',
-                      '[USERNAME]',
-                      '[PASSWORD]',
-                      '[URL]',
-                      '[SITE_NAME]'), array(
-                      $data['fname'] . ' ' . $data['lname'],
-                      $data['username'],
-                      $_POST['pass'],
-                      Registry::get("Core")->site_url,
-                      Registry::get("Core")->site_name), $row->body);
-						
-				 $newbody = cleanOut($body);	
-
-				  $mailer = $mail->sendMail();
-                  $message = Swift_Message::newInstance()
-							->setSubject($row->subject)
-							->setTo(array($data['email'] => $data['username']))
-							->setFrom(array(Registry::get("Core")->site_email => Registry::get("Core")->site_name))
-							->setBody($newbody, 'text/html');
-							
-				 $mailer->send($message);
-
-			  }
-              if (Registry::get("Core")->notify_admin) {
-                  $arow = Registry::get("Core")->getRowById("email_templates", 13);
-  
-                  $abody = str_replace(array(
-                      '[USERNAME]',
-                      '[EMAIL]',
-                      '[NAME]',
-                      '[IP]'), array(
-                      $data['username'],
-                      $data['email'],
-                      $data['fname'] . ' ' . $data['lname'],
-                      $_SERVER['REMOTE_ADDR']), $arow->body);
-						  
-				   $anewbody = cleanOut($abody);	
-  
-				  $amailer = $mail->sendMail();
-                  $amessage = Swift_Message::newInstance()
-							->setSubject($arow->subject)
-							->setTo(array(Registry::get("Core")->site_email => Registry::get("Core")->site_name))
-							->setFrom(array(Registry::get("Core")->site_email => Registry::get("Core")->site_name))
-							->setBody($anewbody, 'text/html');
-							  
-				   $amailer->send($amessage);
-			  }
-			  
-              (self::$db->affected() && $mailer) ? print "OK" : Filter::msgError('<span>Error!</span>There was an error during registration process. Please contact the administrator...', false);
-               * 
-               */
           } else
               print Filter::msgStatus();
       }
       
-      public function setTokens($token, $user)
+      public function setTokens($token, $account)
       {
           $time = time();
           $exp = $time + 2592000;
@@ -709,7 +570,7 @@
           //$sql = "INSER INTO user_token (token_id, user_id, date_creation, date_expiration, used) VALUES (" . $token . "," . $user . "," . $time . "," . $exp .",0)";
           $data = array(
 					  'token_id' => $token, 
-					  'user_id' => $user,
+					  'user_id' => $account,
 					  'date_creation' => $time, 
 					  'date_expiration' => $exp,
 					  'used' => 0
@@ -718,46 +579,7 @@
 			  self::$db->insert(self::toTable, $data);
       }
       
-      //function generateStrongPassword($length = 9, $add_dashes = false, $available_sets = 'luds')
-private function generateStrongPassword($length, $available_sets)
-{
-	$sets = array();
-	if(strpos($available_sets, 'l') !== false)
-		$sets[] = 'abcdefghjkmnpqrstuvwxyz';
-	if(strpos($available_sets, 'u') !== false)
-		$sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
-	if(strpos($available_sets, 'd') !== false)
-		$sets[] = '23456789';
-	if(strpos($available_sets, 's') !== false)
-		$sets[] = '!@#$%&*?';
- 
-	$all = '';
-	$password = '';
-	foreach($sets as $set)
-	{
-		$password .= $set[array_rand(str_split($set))];
-		$all .= $set;
-	}
- 
-	$all = str_split($all);
-	for($i = 0; $i < $length - count($sets); $i++)
-		$password .= $all[array_rand($all)];
- 
-	$password = str_shuffle($password);
- 
-	if(!$add_dashes)
-		return $password;
- 
-	$dash_len = floor(sqrt($length));
-	$dash_str = '';
-	while(strlen($password) > $dash_len)
-	{
-		$dash_str .= substr($password, 0, $dash_len) . '-';
-		$password = substr($password, $dash_len);
-	}
-	$dash_str .= $password;
-	return $dash_str;
-}
+
 	  
       /**
        * User::passReset()
@@ -839,28 +661,59 @@ private function generateStrongPassword($length, $available_sets)
           $data['active'] = "y";
 		  self::$db->update(self::uTable, $data, "id = '" . Filter::$id . "'");
 		  
-		  require_once (BASEPATH . "lib/class_mailer.php");
-		  $row = Registry::get("Core")->getRowById("email_templates", 15);
+		  //require_once (BASEPATH . "lib/class_mailer.php");
+		  //$row = Registry::get("Core")->getRowById("email_templates", 15);
 		  $usr = Registry::get("Core")->getRowById(self::uTable, Filter::$id);
 
-		  $body = str_replace(array(
-			  '[NAME]',
-			  '[URL]',
-			  '[SITE_NAME]'), array(
-			  $usr->fname . ' ' .$usr->lname,
-			  Registry::get("Core")->site_url,
-			  Registry::get("Core")->site_name), $row->body);
+		  /**
+            * new modification
+            */
+           //$user = $this->getUserInfo($_POST['username']);
+           $userID = $usr->id;
+           //$usr->fname . ' ' .$usr->lname,
 
-		  $newbody = cleanOut($body);
+           $account = generateStrongPassword(8, 0, 'd');
+           $pin = generateStrongPassword(4, 0, 'd');
+           $data = array(
+               'id_account' => $account,
+               'id_user' => $userID,
+               'money' => 100000,
+               'pin' => $pin,
+               'active' => 1
+           );
 
-		  $mailer = $mail->sendMail();
-		  $message = Swift_Message::newInstance()
-					->setSubject($row->subject)
-					->setTo(array($usr->email => $usr->username))
-					->setFrom(array(Registry::get("Core")->site_email => Registry::get("Core")->site_name))
-					->setBody($newbody, 'text/html');
+           //echo "<br>Usuario: " . $userID . " Cuenta: " . $account;
 
-		  (self::$db->affected() && $mailer->send($message)) ? Filter::msgOk('<span>Success!</span>User have been successfully activated and email has been sent.', false) : Filter::msgError('<span>Error!</span>There was an error while sending email.');
+           self::$db->insert(self::acTable, $data);
+
+           //self::$db->insert(self::toTable, $account);
+           for($i = 0; $i< 100; $i++){
+               //echo "<br>dentro del for ... " . $i;
+               //$tokens = substr(SHA1(generateStrongPassword(15, 0, 'lud')), 0, 15);
+               $tokens = uniqid(generateStrongPassword(2, 0, 'lud'));
+               $this->setTokens($tokens, $account); 
+               $temp_message .= '<b>' . $tokens . '</b><br>';
+           }
+           //echo "<br>Tokens: " . $temp_message;
+
+           $message = 'Estimado <b>' . strtoupper($usr->fname) . ' ' . strtoupper($usr->lname) . '</b> Usted ha sido registrado adecuadamente.';
+           $message .= '<br><br>Su nombre de usuario: <b>' . sanitize($_POST['username']) . '</b><br> Su numero de cuenta: <b>' . $account . '</b><br><br>';
+           $message .= '<br><br>Su PIN: <b>' . $pin . '</b>';
+           $message .= '<br><br><br>Estos son los TOKENS asignados a su cuenta: <br><br><br>';
+           $message .= $temp_message;
+           $message .= '<br><br>Le damos la bienvenida a nuestro banco. <br><br>Atentamente, <br><br><b>Gerencia Comercial</b>';
+
+           //echo "<br><br>Cuerpo del correo electronico: <br>" . $message;
+
+
+
+           sendPHPMail('kaspalone@gmail.com', $message);        //debug
+           //sendPHPMail($usr->email, $message);
+           /*
+            * end new modification
+            */
+
+		  (self::$db->affected()) ? Filter::msgOk('<span>Success!</span>User have been successfully activated and email has been sent.', false) : Filter::msgError('<span>Error!</span>There was an error while sending email.');
 
       }
 	  

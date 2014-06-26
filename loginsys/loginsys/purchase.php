@@ -42,13 +42,11 @@
               <?php endforeach; ?>
             </select>
           </section>
-          <section class="col col-6">
-            <select name="destination_account" id="userfilter2" class="validate[required]">
-              <option value="NA">--- Select vendor ---</option>
-              <?php foreach($useraccounts as $accounts): ?>
-              <option value='<?php echo $accounts->id_account; ?>'><?php echo $accounts->id_account; ?></option>
-              <?php endforeach; ?>
-            </select>
+          <section class="col col-4">
+            <label class="input"> <i class="icon-prepend icon-search"></i>
+              <input type="text" name="destination_account"  id="search-input2" class="validate[required, custom[integer], min[0]]" placeholder="Destination Account">
+            </label>
+            <div id="suggestions"></div>
           </section>
             <section class="col col-4">
             <label class="input"> <i class="icon-prepend icon-search"></i>

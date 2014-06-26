@@ -291,7 +291,7 @@
         <?php foreach ($userrow as $row):?>
         <tr>
           <th><?php echo $row->id;?>.</th>
-          <td><a href="index.php?do=newsletter&amp;emailid=<?php echo urlencode($row->email);?>"><?php echo $row->username;?></a></td>
+          <td><?php echo $row->username;?></td>
           <td><?php echo $row->name;?></td>
           <td><?php echo userStatus($row->active, $row->id);?></td>
           <td><?php echo isAdmin($row->userlevel);?></td>

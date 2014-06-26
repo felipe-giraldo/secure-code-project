@@ -19,7 +19,7 @@
 <?php include("header.php");?>
 <div id="msgholder2"><?php print Filter::$showMsg;?></div>
 <form method="post" id="login_form" name="login_form" class="xform">
-  <header>User Login</header>
+  <header>User Authentication</header>
   <section>
     <div class="row">
       <div class="col col-3">
@@ -44,6 +44,17 @@
       </div>
     </div>
   </section>
+  <section>
+      <div class="row">
+      <div class="col col-3">
+          <label>Captcha</label>
+      </div>
+          <div class="col col-9">
+		<label class="input"> <img src="lib/captcha.php" alt="" class="captcha-append" /> <i class="icon-prepend icon-eye-open"></i>
+		  <input type="text" name="captcha" placeholder="Captcha Code">
+		</label>
+      </div></div>
+	  </section>
   <footer>
     <div class="row">
       <div class="col col-4">

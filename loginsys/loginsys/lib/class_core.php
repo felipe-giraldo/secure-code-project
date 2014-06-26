@@ -369,7 +369,7 @@
             self::$db->update(self::trTable, $data, "id = '" . $transaction_id . "'");      //we update the transaction state
       }
       
-      public function getAccounts()
+      public function getAccounts($user)
       {
           /*
           if(!empty($user)):
@@ -380,7 +380,7 @@
            * 
            */
           
-          $sql = "SELECT * FROM " . self::acTable;
+          $sql = "SELECT * FROM " . self::acTable . " WHERE id_user = " . $user;
           
           $row = self::$db->fetch_all($sql);
           
@@ -451,6 +451,18 @@
           
           if(empty($destination)):
               Filter::$msgs['destination_account'] = 'Please select an account to transfer the funds to.';
+          endif;
+          
+          if(!is_numeric($destination)):
+              Filter::$msgs['destination_account'] = 'The destination account number must contain ONLY numbers.';
+          endif;
+          
+          if(strlen($destination) != 8):
+              Filter::$msgs['destination_account'] = 'The destination account must be composed of 8 digits, check your data.';
+          endif;
+          
+          if(strlen($origin) != 8):
+              Filter::$msgs['origin_account'] = 'The origin account must be composed of 8 digits, check your data.';
           endif;
           
           if($destination == $origin):
@@ -538,6 +550,12 @@
                 self::$db->update(self::acTable, $data, "id_account='" . $destination . "'");
                 //self::updateAccount($destination, $ammount, 1);          //we deposit the money on the destination account
                 self::$db->update(self::toTable, $data_token, "token_id LIKE '" . $token . "'");      //we discard the token
+                
+                if($type == 1):
+                    Filter::msgOk('<span>Success!</span>Money transfer successful. Thank you for using our banking services.', false);
+                else:
+                    Filter::msgOk('<span>Success!</span>Payment successful. Thank you for using our banking services.', false);
+                endif;
                  
                  
             endif;

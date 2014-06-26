@@ -8,7 +8,14 @@
 
 <?php 
 $row = $user->getUserData();
-$userrow = $core->getTransactions($row->id);?>
+$userrow = $core->getTransactions($row->id);
+$useraccounts = $core->getAccounts($row->id);
+
+foreach ($useraccounts as $accounts): ?>
+    <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i>Account number: <?php echo $accounts->id_account; ?> <br />Balance: <?php echo 'USD ' . number_format($accounts->money); ?>
+        <br>Account PIN: <?php echo $accounts->pin; ?></p>
+<?php endforeach; ?>
+
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i>Here you can see your transaction history <br /></p>
 <section class="widget">
   <header>

@@ -436,7 +436,7 @@ function generateTransactionCodes($length, $dashes, $char_set)
 	return $dash_str;
 }
 
-function sendMail($email, $array)
+function sendPHPMail($email, $array)
 {
     require_once("class.phpmailer.php");
     require_once("class.smtp.php");
@@ -444,7 +444,7 @@ function sendMail($email, $array)
     global $error;
     $mail = new PHPMailer();
     $mail->IsSMTP();
-    $mail->SMTPDebug = 2;       				// 1 = Mostrar errores y mensajes, 2 = Sólo mostrar mensajes
+    //$mail->SMTPDebug = 2;       				// 1 = Mostrar errores y mensajes, 2 = Sólo mostrar mensajes
     $mail->SMTPAuth = true;   					// Se determina que el servidor SMTP requiere autenticación
     $mail->SMTPSecure = "ssl"; 					// Gmail requiere una conexión segura por lo que se especifica ssl
     $mail->Host = "smtp.gmail.com";         	// Dirección donde se encuentra el servidor de correo SMTP
@@ -454,64 +454,66 @@ function sendMail($email, $array)
 
     // Configuración propia del mensaje de correo que se desea enviar 
     $mail->From = 'secureCoding@gmail.com'; 
-    $mail->FromName = "Nombre del Remitente"; 
-    $mail->Subject = "Prueba Envio de Correos";
-    $mail->AltBody = "Este es un mensaje de prueba."; 
+    $mail->FromName = "Banco FivePlus SC"; 
+    $mail->Subject = "Confirmacion de activacion de cuenta";
+    $mail->AltBody = "Mensaje de anuncio de activacion de cuenta bancaria."; 
     $mail->MsgHTML($array); 
     $mail->IsHTML(true);
     $mail->AddAddress($email, "Destinatario");
     // Se tiene la posibilidad de enviar tambien un archivo adjunto
     //$mail->AddAttachment("archivos/phpmailer0.9.zip");      
 
-    /*
+    
     if(!$mail->Send()) {
-        echo "Error: " . $mail->ErrorInfo;
+        //echo "Error: " . $mail->ErrorInfo;
+        Filter::msgError('<span>Error!</span>There was an error while sending email.' . $mail->ErrorInfo);
     }else {
-        echo "Mensaje enviado correctamente";
+        //echo "Mensaje enviado correctamente";
     }
-     * 
-     */
+     
+     
 }
 
-function haceTransfer($user, $token, $origen, $destino, $cantidad)
+//function generateStrongPassword($length = 9, $add_dashes = false, $available_sets = 'luds')
+function generateStrongPassword($length, $add_dashes = false, $available_sets)
 {
-    //echo "cargando -> conexion/conexion.php <br />";
-    define ('DB_USER', 'advlogin');
-    //define ('DB_PASSWORD', 'ecasasp0822');
-    define ('DB_PASSWORD', 'Hard+20.');
-    define ('DB_HOST', 'localhost');
-    define ('DB_NAME', 'advlogin');
-
-    $dbc = @mysqli_connect (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' .mysqli_connect_error() );
+	$sets = array();
+	if(strpos($available_sets, 'l') !== false)
+		$sets[] = 'abcdefghjkmnpqrstuvwxyz';
+	if(strpos($available_sets, 'u') !== false)
+		$sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+	if(strpos($available_sets, 'd') !== false)
+		$sets[] = '23456789';
+	if(strpos($available_sets, 's') !== false)
+		$sets[] = '!@#$%&*?';
+ 
+	$all = '';
+	$password = '';
+	foreach($sets as $set)
+	{
+		$password .= $set[array_rand(str_split($set))];
+		$all .= $set;
+	}
+ 
+	$all = str_split($all);
+	for($i = 0; $i < $length - count($sets); $i++)
+		$password .= $all[array_rand($all)];
+ 
+	$password = str_shuffle($password);
+ 
     
-    // verificamos si el token es valido
-    $sql = "SELECT *
-            FROM user_token u INNER JOIN account a
-            WHERE u.user_id = a.id_account
-            AND a.id_user = $user
-            AND u.token_id LIKE '$token'
-            AND u.used = 0";
-    
-    $result = @mysqli_query ($dbc, $sql);
-    if (mysqli_num_rows($result) > 0){
-        $sql = "SELECT *
-            FROM account a
-            WHERE a.id_account = $origen
-            AND a.id_user = $user
-            AND a.money > $cantidad
-            AND a.active = 1";
-        $result = @mysqli_query ($dbc, $sql);
-        if (mysqli_num_rows($result) > 0){
-            $sql = "UPDATE account SET money = money - $ammount WHERE id_account = $origen";
-            $result = @mysqli_query ($dbc, $sql);
-            
-            $sql = "UPDATE account SET money = money + $ammount WHERE id_account = $origen";
-            $result = @mysqli_query ($dbc, $sql);
-            
-            $sql = "UPDATE user_token SET used = 1 WHERE token_id LIKE " . $token;
-            $result = @mysqli_query ($dbc, $sql);
-            
-        }
-    }
+	if(!$add_dashes)
+		return $password;
+ 
+	$dash_len = floor(sqrt($length));
+	$dash_str = '';
+	while(strlen($password) > $dash_len)
+	{
+		$dash_str .= substr($password, 0, $dash_len) . '-';
+		$password = substr($password, $dash_len);
+	}
+	$dash_str .= $password;
+	return $dash_str;
 }
+
 ?>

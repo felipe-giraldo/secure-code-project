@@ -47,4 +47,13 @@
   define("ADMINURL", $core->site_url."/admin");
   define("UPLOADS", BASEPATH."uploads/");
   define("UPLOADURL", SITEURL."/uploads/");
+  
+  define('AUTH_KEY',         '~oD~~SIFc)0B%P)hE@}2`$ ]H$g)M+:H|%[Ev+f}Fd<^:&]jM?B`j4smHpj{cc}X');
+  define('SECURE_AUTH_KEY',  'hU=bG8l-Y@h8>)%^82@Ar+!++8tR=52;ti5-J_r DBUzg_ Ozs{XGpq8u] H3RKi');
+  define('LOGGED_IN_KEY',    'l]xU~L:>sCs-U/$b8E~onM.mS,oS[[oVQ9c|vX=:SGt>j]mxU[F?eGF.)^%]jU7d');
+  define('NONCE_KEY',        '6nbOgr-fX6Cf=Jqu3yO`[?YMKo$4+liek4:sHo[8okYW}&J9hH^5L~JGyCumL.Kd');
+  define('AUTH_SALT',        'qF[%(TEe4!,i5<?06]u1rX fDiX<Ixbe!}]vQOe8<cjHz+#k)`dSCeh tJ&hKSs<');
+  define('SECURE_AUTH_SALT', '{NH|)!D|k4 pIoT6La)U.u+vs810?)rWx&+OZVHkng^32IVqjqcWdRu5^-|bU|`~');
+  define('LOGGED_IN_SALT',   'q(::|2JEE c+BNBxxG|]o(*]3h24+?EkkFvP=U7|+e6QS/=cQH5T-Efe]`-S9z2w');
+  define('NONCE_SALT',       '~l<8agXI}CPTVI29w[n;K9AUMm- GQ(Edc6Fu<9vSL-<U7[,#Z3s+{nMAhMD6&a.');
 ?>
