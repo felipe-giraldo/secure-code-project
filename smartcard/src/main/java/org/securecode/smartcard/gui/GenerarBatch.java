@@ -6,7 +6,20 @@
 
 package org.securecode.smartcard.gui;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.securecode.smartcard.tools.AES;
+import org.securecode.smartcard.tools.BatchTransactionModel;
+import org.securecode.smartcard.tools.FileManager;
+import org.securecode.smartcard.tools.LoadProperties;
 
 /**
  *
@@ -14,6 +27,9 @@ import javax.swing.table.DefaultTableModel;
  */
 public class GenerarBatch extends javax.swing.JFrame {
 
+    private static final Logger logger = Logger.getLogger(GenerarBatch.class);
+    private static final LoadProperties props = new LoadProperties("configuracion.properties");
+    
     /**
      * Creates new form GenerarBatch
      */
@@ -46,12 +62,17 @@ public class GenerarBatch extends javax.swing.JFrame {
 
         lblFormulario.setFont(new java.awt.Font("Lucida Grande", 1, 18)); // NOI18N
         lblFormulario.setText("Generar Archivo Batch");
+        lblFormulario.setFocusable(false);
 
         lblArchivoSalida.setText("Archivo de salida");
+        lblArchivoSalida.setFocusable(false);
 
+        tFldArchivoSalida.setText("movements.txt");
         tFldArchivoSalida.setToolTipText("Ingrese aquí la ruta absoluta del archivo de salida");
+        tFldArchivoSalida.setNextFocusableComponent(btnGenerar);
 
         btnGenerar.setText("Generar");
+        btnGenerar.setNextFocusableComponent(btnLimpiar);
         btnGenerar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnGenerarActionPerformed(evt);
@@ -59,6 +80,7 @@ public class GenerarBatch extends javax.swing.JFrame {
         });
 
         btnLimpiar.setText("Limpiar");
+        btnLimpiar.setNextFocusableComponent(btnVolver);
         btnLimpiar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLimpiarActionPerformed(evt);
@@ -66,6 +88,7 @@ public class GenerarBatch extends javax.swing.JFrame {
         });
 
         btnVolver.setText("Volver");
+        btnVolver.setNextFocusableComponent(tblDatos);
         btnVolver.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnVolverActionPerformed(evt);
@@ -107,6 +130,7 @@ public class GenerarBatch extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
+        tblDatos.setNextFocusableComponent(tFldArchivoSalida);
         scrPnlTabla.setViewportView(tblDatos);
         if (tblDatos.getColumnModel().getColumnCount() > 0) {
             tblDatos.getColumnModel().getColumn(0).setResizable(false);
@@ -161,6 +185,41 @@ public class GenerarBatch extends javax.swing.JFrame {
 
     private void btnGenerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarActionPerformed
         // TODO add your handling code here:
+        
+        DefaultTableModel modelo = (DefaultTableModel) tblDatos.getModel();
+        StringBuilder output = new StringBuilder();
+        
+        for (int i = 0; i < modelo.getRowCount() && modelo.getValueAt(i, 0) != null; i ++) {
+            BatchTransactionModel item = new BatchTransactionModel();
+            item.setCuentaOrigen(modelo.getValueAt(i, 0).toString());
+            item.setCuentaDestino(modelo.getValueAt(i, 1).toString());
+            item.setValor(new BigInteger(modelo.getValueAt(i, 2).toString()));
+            item.setToken(modelo.getValueAt(i, 3).toString());
+            output.append(item.toString());
+            output.append("||");
+        }
+        
+        String fileName = tFldArchivoSalida.getText();
+        if (StringUtils.isBlank(fileName)) {
+            JOptionPane.showMessageDialog(null, "El nombre de archivo no puede estar vacio", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        logger.debug("String original: " + output.toString());
+        while (output.length() % 16 > 0)
+            output.append(props.getPropiedad("padding"));
+        logger.debug("String con padding: " + output.toString());
+        
+        byte[] cifrado = AES.encrypt(output.toString(), props.getPropiedad("aes.key"));
+        logger.debug("String cifrada: " + cifrado);
+        logger.debug("String descifrado: " + AES.decrypt(cifrado, props.getPropiedad("aes.key")));
+        
+        new FileManager().writeByteToFile(cifrado, fileName);
+        
+        byte[] leido = copiarFicheroAMemoria(fileName);
+        logger.debug("Leido del archivo: " + leido);
+        logger.debug("String descifrado: " + AES.decrypt(leido, props.getPropiedad("aes.key")));
+        
     }//GEN-LAST:event_btnGenerarActionPerformed
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
@@ -188,4 +247,40 @@ public class GenerarBatch extends javax.swing.JFrame {
     private javax.swing.JTextField tFldArchivoSalida;
     private javax.swing.JTable tblDatos;
     // End of variables declaration//GEN-END:variables
+
+    private byte[] copiarFicheroAMemoria(String nombreFichero) {
+        
+        byte[] contenidoDelFichero = null;
+        File theFile = new File(nombreFichero);
+        FileInputStream theFIS = null;
+        BufferedInputStream theBIS = null;
+        byte[] buffer = new byte[8 * 1024];
+        int leido = 0;
+        ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
+
+        try {
+            theFIS = new FileInputStream(theFile);
+            theBIS = new BufferedInputStream(theFIS);
+            while ((leido = theBIS.read(buffer)) >= 0) {
+                theBOS.write(buffer, 0, leido);
+            }
+            contenidoDelFichero = theBOS.toByteArray();
+            theBOS.reset();
+            theBOS.close();
+        }
+        catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        finally {
+            if (theBIS != null) {
+                try {
+                    theBIS.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return contenidoDelFichero;
+    }
+    
 }

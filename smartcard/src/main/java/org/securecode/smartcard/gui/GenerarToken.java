@@ -6,11 +6,18 @@
 
 package org.securecode.smartcard.gui;
 
+import javax.swing.JOptionPane;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.securecode.smartcard.tools.SHA;
+
 /**
  *
  * @author felipegiraldo
  */
 public class GenerarToken extends javax.swing.JFrame {
+    
+    private static final Logger logger = Logger.getLogger(GenerarToken.class);
 
     /**
      * Creates new form GenerarToken
@@ -21,6 +28,7 @@ public class GenerarToken extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         lblMensajes.setText("");
+        tFldNumeroPIN.requestFocus();
     }
 
     /**
@@ -37,6 +45,8 @@ public class GenerarToken extends javax.swing.JFrame {
         tFldNumeroPIN = new javax.swing.JTextField();
         lblValor = new javax.swing.JLabel();
         tFldValor = new javax.swing.JTextField();
+        lblCuentaOrigen = new javax.swing.JLabel();
+        tFldCuentaOrigen = new javax.swing.JTextField();
         lblCuentaDestino = new javax.swing.JLabel();
         tFldCuentaDestino = new javax.swing.JTextField();
         btnGenerar = new javax.swing.JButton();
@@ -48,14 +58,30 @@ public class GenerarToken extends javax.swing.JFrame {
 
         lblFormulario.setFont(new java.awt.Font("Lucida Grande", 1, 18)); // NOI18N
         lblFormulario.setText("Generar Token");
+        lblFormulario.setFocusable(false);
 
         lblNumeroPIN.setText("Numero PIN");
+        lblNumeroPIN.setFocusable(false);
+
+        tFldNumeroPIN.setNextFocusableComponent(tFldValor);
 
         lblValor.setText("Valor a transferir");
+        lblValor.setFocusable(false);
+
+        tFldValor.setNextFocusableComponent(tFldCuentaOrigen);
+
+        lblCuentaOrigen.setText("Cuenta origen");
+        lblCuentaOrigen.setFocusable(false);
+
+        tFldCuentaOrigen.setNextFocusableComponent(tFldCuentaDestino);
 
         lblCuentaDestino.setText("Cuenta destino");
+        lblCuentaDestino.setFocusable(false);
+
+        tFldCuentaDestino.setNextFocusableComponent(btnGenerar);
 
         btnGenerar.setText("Generar");
+        btnGenerar.setNextFocusableComponent(btnLimpiar);
         btnGenerar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnGenerarActionPerformed(evt);
@@ -63,6 +89,7 @@ public class GenerarToken extends javax.swing.JFrame {
         });
 
         btnLimpiar.setText("Limpiar");
+        btnLimpiar.setNextFocusableComponent(btnVolver);
         btnLimpiar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLimpiarActionPerformed(evt);
@@ -70,13 +97,17 @@ public class GenerarToken extends javax.swing.JFrame {
         });
 
         btnVolver.setText("Volver");
+        btnVolver.setNextFocusableComponent(tFldNumeroPIN);
         btnVolver.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnVolverActionPerformed(evt);
             }
         });
 
+        lblMensajes.setFont(new java.awt.Font("Lucida Grande", 1, 10)); // NOI18N
+        lblMensajes.setForeground(new java.awt.Color(255, 0, 0));
         lblMensajes.setText("Mensajes");
+        lblMensajes.setFocusable(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -90,29 +121,37 @@ public class GenerarToken extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblFormulario)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(lblValor)
-                                    .addComponent(lblCuentaDestino)
-                                    .addComponent(lblNumeroPIN))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(tFldNumeroPIN, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                                        .addComponent(tFldValor))
-                                    .addComponent(tFldCuentaDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnGenerar)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnLimpiar)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnVolver)))
+                                .addComponent(btnVolver))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(lblCuentaDestino)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(tFldCuentaDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(lblValor)
+                                        .addComponent(lblCuentaOrigen)
+                                        .addComponent(lblNumeroPIN))
+                                    .addGap(18, 18, 18)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(tFldNumeroPIN, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                                        .addComponent(tFldValor)
+                                        .addComponent(tFldCuentaOrigen, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addGap(0, 86, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {lblCuentaDestino, lblNumeroPIN, lblValor});
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {lblCuentaDestino, lblCuentaOrigen, lblNumeroPIN, lblValor});
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnGenerar, btnLimpiar, btnVolver});
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {tFldCuentaDestino, tFldCuentaOrigen});
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {tFldNumeroPIN, tFldValor});
 
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -129,6 +168,10 @@ public class GenerarToken extends javax.swing.JFrame {
                     .addComponent(tFldValor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tFldCuentaOrigen, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCuentaOrigen))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tFldCuentaDestino, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblCuentaDestino))
                 .addGap(18, 18, 18)
@@ -138,7 +181,7 @@ public class GenerarToken extends javax.swing.JFrame {
                     .addComponent(btnVolver))
                 .addGap(18, 18, 18)
                 .addComponent(lblMensajes)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         pack();
@@ -147,15 +190,43 @@ public class GenerarToken extends javax.swing.JFrame {
     private void btnGenerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarActionPerformed
         // TODO add your handling code here:
         
+        String numeroPIN = tFldNumeroPIN.getText();
+        String valor = tFldValor.getText();
+        String cuentaOrigen = tFldCuentaOrigen.getText();
+        String cuentaDestino = tFldCuentaDestino.getText();
         
+        if (StringUtils.isBlank(numeroPIN) || StringUtils.isBlank(valor) || 
+                StringUtils.isBlank(cuentaOrigen) || StringUtils.isBlank(cuentaDestino)) {
+            JOptionPane.showMessageDialog(null, "Error en los parametros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        else {
+            StringBuilder preparedToken = new StringBuilder();
+            preparedToken.append(cuentaOrigen);
+            preparedToken.append("|");
+            preparedToken.append(cuentaDestino);
+            preparedToken.append("|");
+            preparedToken.append(valor);
+            preparedToken.append("|");
+            preparedToken.append(numeroPIN);
+            
+            String sha = SHA.getSHA256(preparedToken.toString());
+            if (StringUtils.isNotBlank(sha)) {
+                sha = sha.substring(0, 6);
+                lblMensajes.setText("El token generado es: " + sha);
+                logger.info("El token generado es: " + sha);
+            }
+        }
     }//GEN-LAST:event_btnGenerarActionPerformed
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
         // TODO add your handling code here:
         
+        lblMensajes.setText("");
         tFldNumeroPIN.setText("");
         tFldValor.setText("");
+        tFldCuentaOrigen.setText("");
         tFldCuentaDestino.setText("");
+        tFldNumeroPIN.requestFocus();
     }//GEN-LAST:event_btnLimpiarActionPerformed
 
     private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
@@ -170,12 +241,15 @@ public class GenerarToken extends javax.swing.JFrame {
     private javax.swing.JButton btnLimpiar;
     private javax.swing.JButton btnVolver;
     private javax.swing.JLabel lblCuentaDestino;
+    private javax.swing.JLabel lblCuentaOrigen;
     private javax.swing.JLabel lblFormulario;
     private javax.swing.JLabel lblMensajes;
     private javax.swing.JLabel lblNumeroPIN;
     private javax.swing.JLabel lblValor;
     private javax.swing.JTextField tFldCuentaDestino;
+    private javax.swing.JTextField tFldCuentaOrigen;
     private javax.swing.JTextField tFldNumeroPIN;
     private javax.swing.JTextField tFldValor;
     // End of variables declaration//GEN-END:variables
+
 }
