@@ -1,7 +1,7 @@
 <?php
  
-  if (!defined("_VALID_PHP"))
-      die('Direct access to this location is not allowed.');
+  //if (!defined("_VALID_PHP"))
+  //    die('Direct access to this location is not allowed.');
   
   /**
    * redirect_to()
@@ -88,12 +88,13 @@
    * @param bool $trim
    * @return
    */
-  function sanitize($string, $trim = false, $int = false, $str = false)
+ function sanitize($string, $trim = false, $int = false, $str = false)
   {
       $string = filter_var($string, FILTER_SANITIZE_STRING);
       $string = trim($string);
       $string = stripslashes($string);
-      $string = strip_tags($string);
+      //$string = strip_tags($string);
+      $string = htmlentities($string, ENT_QUOTES, ENT_SUBSTITUTE, "UTF-8");
       $string = str_replace(array('‘', '’', '“', '”'), array("'", "'", '"', '"'), $string);
       
 	  if ($trim)
@@ -461,7 +462,9 @@ function sendPHPMail($email, $array)
     $mail->IsHTML(true);
     $mail->AddAddress($email, "Destinatario");
     // Se tiene la posibilidad de enviar tambien un archivo adjunto
-    //$mail->AddAttachment("archivos/phpmailer0.9.zip");      
+    $temp_dir = sys_get_temp_dir();
+    $file_name = $_SESSION['pdf_name'];
+    $mail->AddAttachment($temp_dir . '/' . $file_name);      
 
     
     if(!$mail->Send()) {

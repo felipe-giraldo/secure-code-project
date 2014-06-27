@@ -28,7 +28,7 @@
 <section class="widget">
   <header>
     <div class="row">
-      <h1><i class="icon-reorder"></i> Viewing Backups</h1>
+      <h1><i class="icon-reorder"></i> Viewing Backups <?php echo ADMINURL; ?></h1>
       <aside> <a class="hint--left hint--add hint--always hint--rounded" data-hint="Create Backup" href="index.php?do=backup&amp;create=1"><span class="icon-plus"></span></a> </aside>
     </div>
   </header>

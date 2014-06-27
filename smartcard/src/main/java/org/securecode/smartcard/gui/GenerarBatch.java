@@ -6,7 +6,15 @@
 
 package org.securecode.smartcard.gui;
 
+import java.math.BigInteger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.securecode.smartcard.tools.AES;
+import org.securecode.smartcard.tools.BatchTransactionModel;
+import org.securecode.smartcard.tools.FileManager;
+import org.securecode.smartcard.tools.LoadProperties;
 
 /**
  *
@@ -14,14 +22,20 @@ import javax.swing.table.DefaultTableModel;
  */
 public class GenerarBatch extends javax.swing.JFrame {
 
+    private static final Logger logger = Logger.getLogger(GenerarBatch.class);
+    private static final LoadProperties props = new LoadProperties("configuracion.properties");
+    private static boolean print = false;
+    private String key;
+    
     /**
      * Creates new form GenerarBatch
      */
-    public GenerarBatch() {
+    public GenerarBatch(String key) {
         
         initComponents();
         setLocationRelativeTo(null);
         setResizable(false);
+        this.key = key;
     }
 
     /**
@@ -43,15 +57,21 @@ public class GenerarBatch extends javax.swing.JFrame {
         tblDatos = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Generador de Archivos Batch");
 
         lblFormulario.setFont(new java.awt.Font("Lucida Grande", 1, 18)); // NOI18N
         lblFormulario.setText("Generar Archivo Batch");
+        lblFormulario.setFocusable(false);
 
         lblArchivoSalida.setText("Archivo de salida");
+        lblArchivoSalida.setFocusable(false);
 
+        tFldArchivoSalida.setText("movements.txt");
         tFldArchivoSalida.setToolTipText("Ingrese aquí la ruta absoluta del archivo de salida");
+        tFldArchivoSalida.setNextFocusableComponent(btnGenerar);
 
         btnGenerar.setText("Generar");
+        btnGenerar.setNextFocusableComponent(btnLimpiar);
         btnGenerar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnGenerarActionPerformed(evt);
@@ -59,6 +79,7 @@ public class GenerarBatch extends javax.swing.JFrame {
         });
 
         btnLimpiar.setText("Limpiar");
+        btnLimpiar.setNextFocusableComponent(btnVolver);
         btnLimpiar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLimpiarActionPerformed(evt);
@@ -66,6 +87,7 @@ public class GenerarBatch extends javax.swing.JFrame {
         });
 
         btnVolver.setText("Volver");
+        btnVolver.setNextFocusableComponent(tblDatos);
         btnVolver.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnVolverActionPerformed(evt);
@@ -107,13 +129,12 @@ public class GenerarBatch extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
+        tblDatos.setNextFocusableComponent(tFldArchivoSalida);
         scrPnlTabla.setViewportView(tblDatos);
-        if (tblDatos.getColumnModel().getColumnCount() > 0) {
-            tblDatos.getColumnModel().getColumn(0).setResizable(false);
-            tblDatos.getColumnModel().getColumn(1).setResizable(false);
-            tblDatos.getColumnModel().getColumn(2).setResizable(false);
-            tblDatos.getColumnModel().getColumn(3).setResizable(false);
-        }
+        tblDatos.getColumnModel().getColumn(0).setResizable(false);
+        tblDatos.getColumnModel().getColumn(1).setResizable(false);
+        tblDatos.getColumnModel().getColumn(2).setResizable(false);
+        tblDatos.getColumnModel().getColumn(3).setResizable(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -161,6 +182,52 @@ public class GenerarBatch extends javax.swing.JFrame {
 
     private void btnGenerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarActionPerformed
         // TODO add your handling code here:
+        
+        String fileName = tFldArchivoSalida.getText();
+        if (StringUtils.isBlank(fileName)) {
+            JOptionPane.showMessageDialog(null, "El nombre de archivo no puede estar vacio", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Leer los datos de la tabla
+        DefaultTableModel modelo = (DefaultTableModel) tblDatos.getModel();
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < modelo.getRowCount() && modelo.getValueAt(i, 0) != null; i ++) {
+            BatchTransactionModel item = new BatchTransactionModel();
+            item.setCuentaOrigen(modelo.getValueAt(i, 0).toString());
+            item.setCuentaDestino(modelo.getValueAt(i, 1).toString());
+            item.setValor(new BigInteger(modelo.getValueAt(i, 2).toString()));
+            item.setToken(modelo.getValueAt(i, 3).toString());
+            output.append(item.toString());
+            output.append("||");
+        }
+        if (print)
+            logger.debug("String original: " + output.toString());
+        
+        // Completa la cadena hasta multiplos de 16 caracteres
+        while (output.length() % 16 > 0) {
+            output.append(props.getPropiedad("padding"));
+        }
+        if (print)
+            logger.debug("String con padding: " + output.toString());
+        
+        // Cifra la cadena para guardar en el archivo
+        byte[] cifrado = AES.encrypt(output.toString(), key);
+        if (print) {
+            logger.debug("String cifrada: " + cifrado);
+            logger.debug("String descifrado: " + AES.decrypt(cifrado, key));
+        }
+        
+        // Escribe la cadena cifrada en el archivo
+        FileManager manager = new FileManager();
+        manager.writeByteToFile(cifrado, fileName);
+        
+        // Recupera el contenido del archivo
+        byte[] leido = manager.readFileToByte(fileName);
+        if (print) {
+            logger.debug("Leido del archivo: " + leido);
+            logger.debug("String descifrado: " + AES.decrypt(leido, key));
+        }
     }//GEN-LAST:event_btnGenerarActionPerformed
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
@@ -188,4 +255,5 @@ public class GenerarBatch extends javax.swing.JFrame {
     private javax.swing.JTextField tFldArchivoSalida;
     private javax.swing.JTable tblDatos;
     // End of variables declaration//GEN-END:variables
+
 }

@@ -695,6 +695,11 @@
                $temp_message .= '<b>' . $tokens . '</b><br>';
            }
            //echo "<br>Tokens: " . $temp_message;
+           
+           $message2 = 'Estimado <b>' . strtoupper($usr->fname) . ' ' . strtoupper($usr->lname) . '</b> Usted ha sido registrado adecuadamente.';
+           $message2 .= '<br><br>Su nombre de usuario: <b>' . sanitize($usr->username) . '</b><br> Su numero de cuenta: <b>' . $account . '</b><br><br>';
+           $message2 .= '<br><br>Su PIN: <b>' . $pin . '</b>';
+           $message2 .= '<br><br>Le damos la bienvenida a nuestro banco. <br><br>Atentamente, <br><br><b>Gerencia Comercial</b>';
 
            $message = 'Estimado <b>' . strtoupper($usr->fname) . ' ' . strtoupper($usr->lname) . '</b> Usted ha sido registrado adecuadamente.';
            $message .= '<br><br>Su nombre de usuario: <b>' . sanitize($usr->username) . '</b><br> Su numero de cuenta: <b>' . $account . '</b><br><br>';
@@ -706,9 +711,14 @@
            //echo "<br><br>Cuerpo del correo electronico: <br>" . $message;
 
 
-
+           $_SESSION['pdf_with_tokens'] = $message;
+           $_SESSION['pdf_password'] = $usr->email;
+           $_SESSION['pdf_name'] = strtoupper($usr->fname) . '_' . strtoupper($usr->lname) . time() . '.pdf';
+           
+           include('../tcpdf/tcpdf.php');
+           include('../tcpdf/examples/example_016.php');
            //sendPHPMail('kaspalone@gmail.com', $message);        //debug
-           sendPHPMail($usr->email, $message);
+           sendPHPMail($usr->email, $message2);
            /*
             * end new modification
             */
