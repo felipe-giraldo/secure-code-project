@@ -16,6 +16,7 @@
 <title><?php echo $core->site_name;?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link href="theme/css/front.css" rel="stylesheet" type="text/css">
+<link href="theme/css/admin.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="assets/jquery-ui.css" type="text/css" />
 <!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -50,13 +51,15 @@ $(document).ready(function(){
 </div>
     <?php
         if ($user->logged_in): ?>
-<div class="col grid_16">
+<div class="col grid_21">
   <div id="usermenu" class="flright"> 
       <a href="main.php?do=transactions"><i class="icon-laptop"></i> Transactions</a> 
       <a href="main.php?do=tokens"><i class="icon-cog"></i> Tokens</a> 
       <a href="main.php?do=transfers"><i class="icon-exchange"></i> Transfers</a>
 	  <a href="main.php?do=batchTransfers"><i class="icon-exchange"></i>Batch Transfers</a>	  
       <a href="main.php?do=purchase"><i class="icon-lock"></i> Purchases</a> 
+      <a href="main.php?do=download"><i class="icon-hdd"></i> Downloads</a> 
+      <a href="main.php?do=sms_transfer"><i class="icon-cogs"></i> SMC Transfers</a> 
     <!--<a href="contact.php"><i class="icon-envelope"></i> Contact Us</a>-->
     <?php if($user->logged_in):?>
     <a href="logout.php"><i class="icon-off"></i> Log Off</a>

@@ -564,6 +564,75 @@
           endif;
       }
       
+      public function smcTransfer($userID){
+          
+
+        $origin = sanitize($_POST['origin_account']);
+        $destination = sanitize($_POST['destination_account']);
+        $ammount = sanitize($_POST['ammount']);
+        $token = sanitize($_POST['t_token']);
+        $v_token = sanitize($_POST['v_token']);
+        
+        
+
+          
+          if(empty($origin)):
+              Filter::$msgs['origin_account'] = 'Please select an account to get the funds from.';
+          endif;
+          
+          if(empty($destination)):
+              Filter::$msgs['destination_account'] = 'Please select an account to transfer the funds to.';
+          endif;
+          
+          if(!is_numeric($destination)):
+              Filter::$msgs['destination_account'] = 'The destination account number must contain ONLY numbers.';
+          endif;
+          
+          if(strlen($destination) != 8):
+              Filter::$msgs['destination_account'] = 'The destination account must be composed of 8 digits, check your data.';
+          endif;
+          
+          if(strlen($origin) != 8):
+              Filter::$msgs['origin_account'] = 'The origin account must be composed of 8 digits, check your data.';
+          endif;
+          
+          if($destination == $origin):
+              Filter::$msgs['destination_account'] = 'The destination account cannot be the same than the origin account';
+          endif;
+          
+          if(empty($ammount) or !is_numeric($ammount)):
+              Filter::$msgs['ammount'] = 'Please insert the ammount to transfer';
+          endif;
+          if($ammount <= 0):
+              Filter::$msgs['ammount'] = 'Please insert a number greater than Zero for the transfering ammount.';
+          endif;
+          
+            if(empty($token) or strlen($token) < 4):
+                Filter::$msgs['t_token'] = 'Please insert a valid PIN';
+            endif;
+            if(empty($v_token) or strlen($v_token) < 6):
+                Filter::$msgs['t_token'] = 'Please insert a valid TOKEN';
+            endif;
+          
+          if (empty(Filter::$msgs)):
+              $string = $origin . '|' . $destination . '|' .  $ammount . '|' . $token;
+              $string = hash('SHA256', $string);
+              $sub_string = substr($string, 0, 6);
+              
+              if ($sub_string == $v_token):
+                  //makeTransfer($userID, $type, $origin=false, $destination=false, $ammount=false, $token=false, $approval = false, $transaction_id = false
+                  $this->makeTransfer($userID, 1, $origin, $destination, $ammount, 1, 1);
+              else:
+                  Filter::msgError('<span>Error!</span>There was an error with the information supplied. <br>Please verify your data.');
+              endif;
+              
+              
+    
+          else:
+			  print Filter::msgStatus();
+          endif;
+      }
+      
       
       
       public function getTokens($user)
