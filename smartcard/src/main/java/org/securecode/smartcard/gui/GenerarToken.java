@@ -55,6 +55,7 @@ public class GenerarToken extends javax.swing.JFrame {
         lblMensajes = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Generador de Tokens");
 
         lblFormulario.setFont(new java.awt.Font("Lucida Grande", 1, 18)); // NOI18N
         lblFormulario.setText("Generar Token");
@@ -138,9 +139,12 @@ public class GenerarToken extends javax.swing.JFrame {
                                         .addComponent(lblNumeroPIN))
                                     .addGap(18, 18, 18)
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(tFldNumeroPIN, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                                         .addComponent(tFldValor)
-                                        .addComponent(tFldCuentaOrigen, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(tFldCuentaOrigen, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(tFldNumeroPIN, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGap(0, 0, Short.MAX_VALUE))))))
                         .addGap(0, 86, Short.MAX_VALUE)))
                 .addContainerGap())
         );

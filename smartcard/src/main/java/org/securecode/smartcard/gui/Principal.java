@@ -94,7 +94,7 @@ public class Principal extends javax.swing.JFrame {
     private void btnGenerarBatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarBatchActionPerformed
         // TODO add your handling code here:
         
-        new GenerarBatch().setVisible(true);
+        new DatosUsuario().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnGenerarBatchActionPerformed
 

@@ -6,9 +6,12 @@
 
 package org.securecode.smartcard.tools;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -67,6 +70,41 @@ public class FileManager {
                 logger.error("Error: " + ex.getMessage());
             }
         }
+    }
+    
+    public byte[] readFileToByte(String fileName) {
+        
+        byte[] bytes = null;
+        File file = new File(fileName);
+        FileInputStream fis = null;
+        BufferedInputStream bis = null;
+        byte[] buffer = new byte[32 * 1024];
+        int read = 0;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try {
+            fis = new FileInputStream(file);
+            bis = new BufferedInputStream(fis);
+            while ((read = bis.read(buffer)) >= 0) {
+                bos.write(buffer, 0, read);
+            }
+            bytes = bos.toByteArray();
+            bos.reset();
+            bos.close();
+        }
+        catch (IOException ex) {
+            logger.error("Error: " + ex);
+        }
+        finally {
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException ex) {
+                    logger.error("Error: " + ex);
+                }
+            }
+        }
+        return bytes;
     }
     
     public boolean writeByteToFile(byte[] bytes, String fileName) {
