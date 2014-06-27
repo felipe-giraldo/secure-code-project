@@ -7,7 +7,7 @@
   if ($user->is_Admin())
       redirect_to("index.php");
 	  
-  if (isset($_POST['submit']))
+  if (isset($_POST['doLogin']))
       : $result = $user->login($_POST['username'], $_POST['password']);
   //Login successful 
   if ($result)
@@ -33,7 +33,7 @@
       <h1><i class="icon-lock icon-3x pull-left"></i> Admin Panel<span><?php echo $core->site_name;?></span></h1>
     </header>
     <div class="loginwrap">
-      <form id="admin_form" name="admin_form" method="post" action="#" class="xform loginform">
+      <form id="admin_form" name="admin_form" method="post" class="xform loginform">
         <section>
           <div class="row">
             <div class="col col-12">
@@ -52,9 +52,20 @@
             </div>
           </div>
         </section>
+		<section>
+			  <div class="row">
+			  <div class="col col-12">
+				<label class="input"> 
+					<img src="../lib/captcha.php" alt="" class="captcha-append" />
+					<i class="icon-prepend icon-eye-open"></i>
+					<input type="text" name="captcha" placeholder="Captcha Code">
+				</label>
+			  </div></div>
+		</section>
         <footer>
           <button name="submit" class="button-login">Login</button>
         </footer>
+		<input name="doLogin" type="hidden" value="1" />
       </form>
     </div>
     <div class="loginshadow"></div>

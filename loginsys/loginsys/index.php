@@ -17,8 +17,9 @@
   endif;
 ?>
 <?php include("header.php");?>
+
 <div id="msgholder2"><?php print Filter::$showMsg;?></div>
-<form method="post" id="login_form" name="login_form" class="xform">
+<form method="post" id="login_form" name="login_form" class="xform" autocomplete="off">
   <header>User Authentication</header>
   <section>
     <div class="row">
@@ -27,7 +28,7 @@
       </div>
       <div class="col col-9">
         <label class="input"> <i class="icon-prepend icon-user"></i> <i class="icon-append icon-asterisk"></i>
-          <input  type="text" name="username" placeholder="Username">
+          <input  type="text" name="username" placeholder="Username" autocomplete="off"/>
         </label>
       </div>
     </div>
@@ -39,7 +40,7 @@
       </div>
       <div class="col col-9">
         <label class="input"> <i class="icon-prepend icon-lock"></i> <i class="icon-append icon-asterisk"></i>
-          <input type="password"  name="password" placeholder="**********">
+          <input type="password"  name="password" placeholder="**********" autocomplete="off"/>
         </label>
       </div>
     </div>
@@ -51,7 +52,7 @@
       </div>
           <div class="col col-9">
 		<label class="input"> <img src="lib/captcha.php" alt="" class="captcha-append" /> <i class="icon-prepend icon-eye-open"></i>
-		  <input type="text" name="captcha" placeholder="Captcha Code">
+		  <input type="text" name="captcha" placeholder="Captcha Code" autocomplete="off">
 		</label>
       </div></div>
 	  </section>

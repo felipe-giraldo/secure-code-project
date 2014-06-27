@@ -556,8 +556,6 @@
 			  
 			  self::$db->insert(self::uTable, $data);
               
-              
-              
           } else
               print Filter::msgStatus();
       }
