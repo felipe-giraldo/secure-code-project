@@ -706,6 +706,7 @@ int decrypt(
 {
    MCRYPT td = mcrypt_module_open("rijndael-128", NULL, "cbc", NULL);
    int blocksize = mcrypt_enc_get_block_size(td);
+   printf("::: blocksize= %d buffer_len=%d\n", blocksize, buffer_len);
    if ( buffer_len % blocksize != 0 )
    {
       return 1;
@@ -788,6 +789,7 @@ int main (int argc, char *argv[]) {
     if ( ! feof( ciphered)) {
 		buffer_len = fread( buf, sizeof(char), 32000, ciphered);
         int ok = decrypt(buf, buffer_len, IV, key, key_size);
+        fwrite( buf, sizeof(char), buffer_len, stdout);
         if ( ok ){
             printf("*** No pudo descifrar correctamente");
             exit(1);
@@ -861,11 +863,11 @@ int main (int argc, char *argv[]) {
    // Si no hubo errores, haga commit, else rechace el batch completo
    if ( !nError){
       mysql_commit(connector);
-      printf(">>> Batch de transacciones procesado correctamente. N transacciones = %d", nM);
+      printf(">>> Batch de transacciones procesado correctamente. N transacciones = %d\n", nM);
    } else
    {   
       mysql_rollback(connector);
-      printf(">>> Batch de transacciones fue rechazado. N transacciones = %d, N errores = %d", nM, nError);
+      printf(">>> Batch de transacciones fue rechazado. N transacciones = %d, N errores = %d\n", nM, nError);
    }
 
    mysql_close(connector);
