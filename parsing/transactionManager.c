@@ -811,7 +811,10 @@ int main (int argc, char *argv[]) {
    while (!feof(file))
    {
       memset( line, 0, 80 * sizeof(char));
-      fgets(line, 80, file);
+      char *b =fgets(line, 80, file);
+      if ( b == NULL)
+        break;
+        
       nM++;
 
 
