@@ -481,15 +481,17 @@
               $state = 1;
           endif;
           
-          if(!$approval):
-            if(empty($token) or strlen($token) < 15):
-                Filter::$msgs['t_token'] = 'Please insert a valid token key';
-            endif;
+          if($token != 1):
+            if(!$approval):
+              if(empty($token) or strlen($token) < 15):
+                  Filter::$msgs['t_token'] = 'Please insert a valid token key';
+              endif;
 
-            $valid_token = $this->checkValidToken(sanitize($token), $userID);
-            $v_token = $valid_token->used;
-            if($v_token != 0 or !is_numeric($v_token)) :
-                Filter::$msgs['t_token'] = 'Please insert a valid and available token key';
+              $valid_token = $this->checkValidToken(sanitize($token), $userID);
+              $v_token = $valid_token->used;
+              if($v_token != 0 or !is_numeric($v_token)) :
+                  Filter::$msgs['t_token'] = 'Please insert a valid and available token key';
+              endif;
             endif;
           endif;
           

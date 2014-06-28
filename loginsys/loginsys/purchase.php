@@ -7,6 +7,11 @@
 ?>
 
 <?php 
+    $string = 'ehrlichmann' . '|' . '4ba40fedbbd3a54f81c72e14cc52c289' . '|' . '4567';
+    $string = hash('SHA256', $string);
+    $sub_string = substr($string, 0, 16);
+    echo $sub_string;
+
 	//$userrow = $user->getUsers();
 	$row = $user->getUserData();
     $useraccounts = $core->getAccounts($row->id);

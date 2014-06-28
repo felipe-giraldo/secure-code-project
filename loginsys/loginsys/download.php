@@ -26,6 +26,7 @@
   <div class="content2">
     <?php
     $dir = BASEPATH . 'downloads';
+    $uri=  str_replace("main.php?do=download", "", $_SERVER["REQUEST_URI"]);
     //echo $dir;
     if (is_dir($dir)):
         $getDir = dir($dir);
@@ -34,7 +35,7 @@
                   echo '<div class="db-backup' . $latest . '" id="item_' . $file . '"><i class="icon-hdd pull-left icon-4x icon-white"></i>';
                   echo '<span>' . getSize(filesize(BASEPATH . 'downloads/' . $file)) . '</span>';
                   
-                  echo '<a href="' . BASEPATH . 'downloads/' . $file . '">
+                  echo '<a href="' . $uri . 'downloads/' . $file . '">
                   <small class="sdown tooltip" data-title="Download"><i class="icon-download-alt icon-white"></i></small></a>';
                   
                   
