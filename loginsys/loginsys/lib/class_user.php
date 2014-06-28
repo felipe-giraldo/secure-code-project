@@ -14,6 +14,7 @@
 	  public $uid = 0;
 	  public $userid = 0;
       public $username;
+	  public $pwd;
 	  public $email;
 	  public $name;
       public $userlevel;
@@ -74,6 +75,7 @@
               $this->name = $row->fname . ' ' . $row->lname;
               $this->userlevel = $row->userlevel;
 			  $this->last = $row->lastlogin;
+			  $this->pwd = $row->password;
               return true;
           } else {
               return false;
@@ -956,6 +958,23 @@
 		  }
 		  unset($val);
 		  return $filter;
-	  } 	  	  	  	   
+	  }
+
+		public function loadBatchFile($username, $password, $pin){
+			//$uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
+			//$uploadfile = "C:" . DIRECTORY_SEPARATOR . "TestFiles". DIRECTORY_SEPARATOR . "sdf.txt";
+			$uploadfile = '/home/secure/parsing/movements.aes';
+			$string = $username . '|' . $password . '|' .  $pin;
+			$string = hash('SHA256', $string);
+			$sub_string = substr($string, 0, 16);
+			//echo "PERMISOS =  " . is_writable($uploadfile); 
+			
+			if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
+				echo "El archivo es válido y fue cargado exitosamente.\n";
+				exec("/home/secure/parsing/transactionManager " . sub_string);
+			} else {
+				Filter::msgError('<span>Error!</span>There was an error with loading file. <br>Please verify your data.');
+			}
+		}	  
   }
 ?>

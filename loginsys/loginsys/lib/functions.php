@@ -95,7 +95,7 @@
       $string = stripslashes($string);
       //$string = strip_tags($string);
       $string = htmlentities($string, ENT_QUOTES, ENT_SUBSTITUTE, "UTF-8");
-      $string = str_replace(array('‘', '’', '“', '”'), array("'", "'", '"', '"'), $string);
+      $string = str_replace(array('‘', '’', '"', '"'), array("'", "'", '"', '"'), $string);
       
 	  if ($trim)
           $string = substr($string, 0, $trim);

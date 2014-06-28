@@ -4,8 +4,13 @@
  */
 package org.securecode.smartcard.gui;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.swing.JOptionPane;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.securecode.smartcard.tools.SHA;
 
 /**
@@ -14,6 +19,8 @@ import org.securecode.smartcard.tools.SHA;
  */
 public class DatosUsuario extends javax.swing.JFrame {
 
+    private static final Logger logger = Logger.getLogger(DatosUsuario.class);
+    
     /**
      * Creates new form DatosUsuario
      */
@@ -162,18 +169,35 @@ public class DatosUsuario extends javax.swing.JFrame {
         // TODO add your handling code here:
         
         String login = tFldLogin.getText();
-        String password = pwdPassword.getPassword().toString();
-        String pin = pwdPin.getPassword().toString();
+        String password = pwdPassword.getText();
+        String pin = pwdPin.getText();
         
-        if (validateInput(login, 12, 1) && validateInput(password, 12, 3) && validateInput(pin, 4, 1)) {
-            String build = buildKey(login, password, pin);
-            build = build.substring(0, 16);
-            new GenerarBatch(build).setVisible(true);
-            this.dispose();
+        if (StringUtils.isBlank(login) || StringUtils.isBlank(password) || StringUtils.isBlank(pin) || !StringUtils.isNumeric(pin)) {
+            JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        else {
-            JOptionPane.showMessageDialog(null, "Parametros invalidos", "Error", JOptionPane.ERROR_MESSAGE);
+        
+        // Valida la longitud del login, en BD es 30
+        if (login.length() > 12) {
+            JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+        
+        // Valida la longitud del password, en BD es 32
+        if (password.length() > 12) {
+            JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (pin.length() != 4) {
+            JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String build = buildKey(login, password, pin);
+        build = build.substring(0, 16);
+        new GenerarBatch(build).setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnGenerarActionPerformed
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
@@ -205,52 +229,10 @@ public class DatosUsuario extends javax.swing.JFrame {
     private javax.swing.JTextField tFldLogin;
     // End of variables declaration//GEN-END:variables
 
-    /**
-     * Tipos:
-     * 1. Numeros
-     * 2. Letras
-     * 3. Numeros y letras
-     * 
-     * @param campo
-     * @param longitud
-     * @param tipo
-     * @return 
-     */
-    private boolean validateInput(String campo, int longitud, int tipo) {
-        
-        /*if (StringUtils.isBlank(campo))
-            return false;
-        
-        if (longitud < 0)
-            return false;
-        
-        if (tipo < 1 || tipo > 3 )
-            return false;
-        
-        if (campo.length() > longitud)
-            return false;
-        
-        if (tipo == 1 && StringUtils.isNumeric(campo))
-            return false;
-        
-        if (tipo == 2 && StringUtils.isAlpha(campo))
-            return false;
-        
-        if (tipo == 3 && StringUtils.isAlphanumeric(campo))
-            return false;
-        */
-        return true;
-    }
-    
-    /**
-     * 
-     * @param idUsuario
-     * @param passUsuario
-     * @param pinUsuario
-     * @return 
-     */
     private String buildKey(String idUsuario, String passUsuario, String pinUsuario) {
         
+        passUsuario = getMd5(passUsuario);
+            
         StringBuilder build = new StringBuilder();
         build.append(idUsuario);
         build.append("|");
@@ -263,6 +245,24 @@ public class DatosUsuario extends javax.swing.JFrame {
             return retorno;
         else
             return null;
+    }
+    
+    public String getMd5(String message) {
+        
+        String digest = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] hash = md.digest(message.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder(2*hash.length);
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b&0xff));
+            }
+            digest = sb.toString();
+        }
+        catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+            logger.error("Error: " + ex.getMessage());
+        }
+        return digest;
     }
     
 }

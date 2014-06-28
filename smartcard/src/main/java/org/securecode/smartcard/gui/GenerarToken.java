@@ -194,31 +194,39 @@ public class GenerarToken extends javax.swing.JFrame {
     private void btnGenerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarActionPerformed
         // TODO add your handling code here:
         
+        lblMensajes.setText("");
+        
         String numeroPIN = tFldNumeroPIN.getText();
         String valor = tFldValor.getText();
         String cuentaOrigen = tFldCuentaOrigen.getText();
         String cuentaDestino = tFldCuentaDestino.getText();
         
         if (StringUtils.isBlank(numeroPIN) || StringUtils.isBlank(valor) || 
-                StringUtils.isBlank(cuentaOrigen) || StringUtils.isBlank(cuentaDestino)) {
-            JOptionPane.showMessageDialog(null, "Error en los parametros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+                StringUtils.isBlank(cuentaOrigen) || StringUtils.isBlank(cuentaDestino) || 
+                !StringUtils.isNumeric(numeroPIN) || !StringUtils.isNumeric(valor)) {
+            JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        else {
-            StringBuilder preparedToken = new StringBuilder();
-            preparedToken.append(cuentaOrigen);
-            preparedToken.append("|");
-            preparedToken.append(cuentaDestino);
-            preparedToken.append("|");
-            preparedToken.append(valor);
-            preparedToken.append("|");
-            preparedToken.append(numeroPIN);
-            
-            String sha = SHA.getSHA256(preparedToken.toString());
-            if (StringUtils.isNotBlank(sha)) {
-                sha = sha.substring(0, 6);
-                lblMensajes.setText("El token generado es: " + sha);
-                logger.info("El token generado es: " + sha);
-            }
+        
+        if (numeroPIN.length() != 4 || valor.length() > 8) {
+            JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        StringBuilder preparedToken = new StringBuilder();
+        preparedToken.append(cuentaOrigen);
+        preparedToken.append("|");
+        preparedToken.append(cuentaDestino);
+        preparedToken.append("|");
+        preparedToken.append(valor);
+        preparedToken.append("|");
+        preparedToken.append(numeroPIN);
+
+        String sha = SHA.getSHA256(preparedToken.toString());
+        if (StringUtils.isNotBlank(sha)) {
+            sha = sha.substring(0, 6);
+            lblMensajes.setText("El token generado es: " + sha);
+            logger.info("El token generado es: " + sha);
         }
     }//GEN-LAST:event_btnGenerarActionPerformed
 
