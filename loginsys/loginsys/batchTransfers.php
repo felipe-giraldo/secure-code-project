@@ -4,9 +4,16 @@
   
   if (!defined("_VALID_PHP"))
       die('Direct access to this location is not allowed.');
+	  
+  if(isset($_POST['loadBtn'])) :
+	$accountData = Core::getAccountsStatic($user->uid);
+	$user->loadBatchFile($user->username, $user->pwd, $accountData[0]->pin);
+  endif;
 ?>
 <?php switch(Filter::$action): case "edit": ?>
-<?php $row = Core::getRowById(Users::uTable, Filter::$id);?>
+<?php 
+	$row = Core::getRowById(Users::uTable, Filter::$id);
+?>
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i> Here you can upload your transactions in batch mode<br>
   Fields marked <i class="icon-append icon-asterisk"></i> are required.</p>
 <form class="xform" id="admin_form" method="post">
@@ -232,9 +239,6 @@
 <?php echo Core::doForm("processUser");?>
 <?php break;?>
 <?php default:?>
-<?php $userrow = $user->getUsers();
-    //$useraccounts = $core->getAccounts($userrow -> id);
-?>
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i>Here you can upload transfers in batch mode<br /></p>
 <section class="widget">
   <header>
@@ -246,19 +250,21 @@
   <div class="content2">
     <div class="row">
       <div class="ptop30">
-		<form id="dForm" class="xform" enctype="multipart/form-data" action="loadBatchFile.php" method="POST" style="padding:0;">
+		<form id="dForm" class="xform" enctype="multipart/form-data" method="POST" style="padding:0;">
 			<section class="col col-4">
             <label class="input">
 				<!-- MAX_FILE_SIZE debe preceder el campo de entrada de archivo -->
-				<input type="hidden" name="MAX_FILE_SIZE" value="30000" />
+				<input type="hidden" name="MAX_FILE_SIZE" value="1048576" />
 				<!-- El nombre del elemento de entrada determina el nombre en el array $_FILES -->
-				<input name="userfile" type="file" />
+				<input name="userfile" type="file" accept=".cif"/>
             </label>
             <div id="suggestions"></div>
           </section>
             
           <section class="col col-4">
-            <button class="button inline" name="btnUpload" type="submit">Upload File<span><i class="icon-chevron-right"></i></span></button>
+            <button class="button inline" name="loadBtn" type="submit">
+				Upload File<span><i class="icon-chevron-right"></i></span>
+			</button>
           </section>
           <div class="hr2"></div>
 		</form>

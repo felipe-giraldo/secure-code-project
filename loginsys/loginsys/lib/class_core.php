@@ -386,6 +386,24 @@
           
           return ($row) ? $row : 0;
       }
+	  
+	  public static function getAccountsStatic($user)
+      {
+          /*
+          if(!empty($user)):
+              $sql = "SELECT * FROM " . self::acTable . " WHERE id_user = " . $user;
+          else:
+              $sql = "SELECT * FROM " . self::acTable;
+          endif;
+           * 
+           */
+          
+          $sql = "SELECT * FROM " . self::acTable . " WHERE id_user = " . $user;
+          
+          $row = self::$db->fetch_all($sql);
+          
+          return ($row) ? $row : 0;
+      }
       
       public function checkValidToken($token, $user)
       {
@@ -774,7 +792,7 @@
 	   
       /**
        * Core::getYearlySummary()
-       * 
+       * 																																																				
        * @return
        */
       public function getYearlySummary()
@@ -969,6 +987,5 @@ private function generateStrongPassword($length, $available_sets)
 	}
 	$dash_str .= $password;
 	return $dash_str;
-}
-  }
+}}
 ?>
