@@ -2,4 +2,4 @@ Para instalar el complemento de conexion con mysql:
 sudo apt-get install libmysqlclient-dev
 
 Para compilar ejecute el comando:
-gcc -o transactionManager $(mysql_config --cflags) transactionManager.c -L/usr/lib/i386-linux-gnu -lmysqlclient -lpthread -lz -lm -lrt -ldl
+gcc -o transactionManager $(mysql_config --cflags) transactionManager.c -L/usr/lib/i386-linux-gnu -lmysqlclient -lpthread     -lmcrypt -lz -lm -lrt -ldl
