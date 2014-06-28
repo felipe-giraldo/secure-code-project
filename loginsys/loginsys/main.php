@@ -18,7 +18,7 @@
   <div id="content-wrap">
     <div id="content">
      <div id="msgholder"></div>
-	   <?php (Filter::$do && file_exists(Filter::$do.".php")) ? include(Filter::$do.".php") : include("main.php");?>
+	   <?php (Filter::$do && file_exists(Filter::$do.".php")) ? include(Filter::$do.".php") : include("index.php");?>
     </div>
   </div>
 </div>
