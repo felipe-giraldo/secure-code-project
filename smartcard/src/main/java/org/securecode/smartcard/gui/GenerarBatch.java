@@ -66,7 +66,8 @@ public class GenerarBatch extends javax.swing.JFrame {
         lblArchivoSalida.setText("Archivo de salida");
         lblArchivoSalida.setFocusable(false);
 
-        tFldArchivoSalida.setText("movements.txt");
+        tFldArchivoSalida.setEditable(false);
+        tFldArchivoSalida.setText("movements.cif");
         tFldArchivoSalida.setToolTipText("Ingrese aquí la ruta absoluta del archivo de salida");
         tFldArchivoSalida.setNextFocusableComponent(btnGenerar);
 
@@ -131,10 +132,12 @@ public class GenerarBatch extends javax.swing.JFrame {
         });
         tblDatos.setNextFocusableComponent(tFldArchivoSalida);
         scrPnlTabla.setViewportView(tblDatos);
-        tblDatos.getColumnModel().getColumn(0).setResizable(false);
-        tblDatos.getColumnModel().getColumn(1).setResizable(false);
-        tblDatos.getColumnModel().getColumn(2).setResizable(false);
-        tblDatos.getColumnModel().getColumn(3).setResizable(false);
+        if (tblDatos.getColumnModel().getColumnCount() > 0) {
+            tblDatos.getColumnModel().getColumn(0).setResizable(false);
+            tblDatos.getColumnModel().getColumn(1).setResizable(false);
+            tblDatos.getColumnModel().getColumn(2).setResizable(false);
+            tblDatos.getColumnModel().getColumn(3).setResizable(false);
+        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -190,52 +193,112 @@ public class GenerarBatch extends javax.swing.JFrame {
         }
         
         // Leer los datos de la tabla
+        boolean continuar = false;
         DefaultTableModel modelo = (DefaultTableModel) tblDatos.getModel();
         StringBuilder output = new StringBuilder();
-        for (int i = 0; i < modelo.getRowCount() && modelo.getValueAt(i, 0) != null; i ++) {
+        for (int i = 0; i < modelo.getRowCount(); i ++) {
+            
+            if (modelo.getValueAt(i, 0) == null || modelo.getValueAt(i, 1) == null ||
+                    modelo.getValueAt(i, 2) == null || modelo.getValueAt(i, 3) == null) {
+                break;
+            }
+            
             BatchTransactionModel item = new BatchTransactionModel();
-            item.setCuentaOrigen(modelo.getValueAt(i, 0).toString());
-            item.setCuentaDestino(modelo.getValueAt(i, 1).toString());
-            item.setValor(new BigInteger(modelo.getValueAt(i, 2).toString()));
-            item.setToken(modelo.getValueAt(i, 3).toString());
+            
+            // Validar cuenta origen
+            if (modelo.getValueAt(i, 0) != null) {
+                String cuentaOrigen = modelo.getValueAt(i, 0).toString();
+                if (StringUtils.isAlphanumeric(cuentaOrigen) && cuentaOrigen.length() > 4 && cuentaOrigen.length() < 12) {
+                    item.setCuentaOrigen(cuentaOrigen);
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            
+            // Validar cuenta destino
+            if (modelo.getValueAt(i, 1) != null) {
+                String cuentaDestino = modelo.getValueAt(i, 1).toString();
+                if (StringUtils.isAlphanumeric(cuentaDestino) && cuentaDestino.length() > 4 && cuentaDestino.length() < 12) {
+                    item.setCuentaDestino(cuentaDestino);
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+                
+            // Validar valor
+            if (modelo.getValueAt(i, 2) != null) {
+                String valor = modelo.getValueAt(i, 2).toString();
+                if (StringUtils.isNumeric(valor) && valor.length() > 0 && valor.length() < 9) {
+                    item.setValor(new BigInteger(valor));
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            
+            // Validar token
+            if (modelo.getValueAt(i, 3) != null) {
+                String token = modelo.getValueAt(i, 3).toString();
+                if (StringUtils.isAlphanumeric(token) && token.length() == 15) {
+                    item.setToken(token);
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            
             output.append(item.toString());
             output.append("||");
-        }
-        if (print)
-            logger.debug("String original: " + output.toString());
-        
-        // Completa la cadena hasta multiplos de 16 caracteres
-        while (output.length() % 16 > 0) {
-            output.append(props.getPropiedad("padding"));
-        }
-        if (print)
-            logger.debug("String con padding: " + output.toString());
-        
-        // Cifra la cadena para guardar en el archivo
-        byte[] cifrado = AES.encrypt(output.toString(), key);
-        if (print) {
-            logger.debug("String cifrada: " + cifrado);
-            logger.debug("String descifrado: " + AES.decrypt(cifrado, key));
+            continuar = true;
         }
         
-        // Escribe la cadena cifrada en el archivo
-        FileManager manager = new FileManager();
-        manager.writeByteToFile(cifrado, fileName);
-        
-        // Recupera el contenido del archivo
-        byte[] leido = manager.readFileToByte(fileName);
-        if (print) {
-            logger.debug("Leido del archivo: " + leido);
-            logger.debug("String descifrado: " + AES.decrypt(leido, key));
+        if (continuar) {
+            if (print)
+                logger.debug("String original: " + output.toString());
+
+            // Completa la cadena hasta multiplos de 16 caracteres
+            while (output.length() % 16 > 0) {
+                output.append(props.getPropiedad("padding"));
+            }
+            if (print)
+                logger.debug("String con padding: " + output.toString());
+
+            // Cifra la cadena para guardar en el archivo
+            byte[] cifrado = AES.encrypt(output.toString(), key);
+            if (print) {
+                logger.debug("String cifrada: " + cifrado);
+                logger.debug("String descifrado: " + AES.decrypt(cifrado, key));
+            }
+
+            // Escribe la cadena cifrada en el archivo
+            FileManager manager = new FileManager();
+            manager.writeByteToFile(cifrado, fileName);
+            JOptionPane.showMessageDialog(null, "Se ha generado el archivo " + fileName + " en la ruta de su aplicación", "Información", JOptionPane.INFORMATION_MESSAGE);
+
+            // Recupera el contenido del archivo
+            byte[] leido = manager.readFileToByte(fileName);
+            if (print) {
+                logger.debug("Leido del archivo: " + leido);
+                logger.debug("String descifrado: " + AES.decrypt(leido, key));
+            }
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Error en los parámetros de entrada", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnGenerarActionPerformed
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
         // TODO add your handling code here:
         
-        tFldArchivoSalida.setText("");
         DefaultTableModel modelo = (DefaultTableModel) tblDatos.getModel();
         modelo.getDataVector().removeAllElements();
+        tblDatos.setModel(modelo);
     }//GEN-LAST:event_btnLimpiarActionPerformed
 
     private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
