@@ -9,10 +9,11 @@
  */
 #define _XOPEN_SOURCE
 
+
 // ------------------------------------------------------------------
 // Signed variables are for wimps  necesarios para SHA-2
-#define uchar unsigned char // 8-bit byte
-#define uint unsigned long  // 32-bit word
+#define uchar unsigned char  // 8-bit byte
+#define uint  unsigned long  // 32-bit word
 
 // DBL_INT_ADD treats two unsigned ints a and b as one 64-bit integer and adds c to it
 #define DBL_INT_ADD(a,b,c) if (a > 0xffffffff - (c)) ++b; a += c;
@@ -43,6 +44,7 @@ uint k[64] = {
    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
 };
+ 
 // ----------------------------------------------------------------------
                               
 #include <ctype.h>
@@ -80,7 +82,7 @@ char *getParms(char **p, char **q) {
       j++;
 
    // if input not exhausted
-   if ( !*j)
+   if ( *j)
    {
       // search for the ending ','  or endOfString
       while (*j != ',' && *j != 0 && l <= 80)
@@ -97,7 +99,6 @@ char *getParms(char **p, char **q) {
       // Update pointers for the next parm
       *p = (*j == 0)? j : j + 1;
       *q = *p;
-
    }
 
    return r;
@@ -324,7 +325,7 @@ void sha256_transform(SHA256_CTX *ctx, uchar data[])
    ctx->state[7] += h;
    
 }  //sha256_transform
-
+ 
 /***********************************************************
  * Inicializa el estado de SHA-2
  * 
@@ -345,9 +346,9 @@ void sha256_init(SHA256_CTX *ctx)
    ctx->state[7] = 0x5be0cd19;
    
 }// sha256_init
-
+ 
 /**********************************************************
- * Actualiza el running value del hash
+ * Actualiza el running value del hash SHA-2
  * 
  * ctx  - Contexto
  * data - datos
@@ -420,6 +421,18 @@ void sha256_final(SHA256_CTX *ctx, uchar hash[])
    }  
 }  // sha256_final
 
+/* Imprime el SHA-2 generado
+ * hash - Hash a imprimir
+ */
+void print_hash(unsigned char hash[])
+{
+   int idx;
+   for (idx=0; idx < 32; idx++)
+      printf("%02x[%d]",hash[idx], hash[idx]);
+   printf("\n");
+}//print_hash
+
+
 
 /**********************************************************************
 Get the AES key based on the user id
@@ -430,11 +443,19 @@ key       - LLave AES a obtener
 */
 int getAESKey( MYSQL *connector, int user_id,  char *key) {
 	
-   char *fixKey = "felipe|felipe|1234";
+   uchar *fixKey = (uchar *)"felipe|felipe|1234";
+   
+   SHA256_CTX ctx;
+   unsigned char hash[32];
+   sha256_init(&ctx);
+   sha256_update(&ctx,fixKey,strlen((char*)fixKey));
+   sha256_final(&ctx,hash);
+   print_hash(hash);
+ 
+   
    int i = 0;
-
    for (i=0; i < 31; i++)
-      key[i] = fixKey[i];
+      key[i] = hash[i];
 
    return 1;
    
@@ -561,7 +582,7 @@ char *validate(MYSQL *connector, char** param){
    // Cuenta debe tener 9 caracteres o menos
    // Cuenta debe ser numerica
    // La cuenta-desde debe existir en el maestro de cuentas
-   printf("::: Cuenta-desde");
+   printf("::: Cuenta-desde\n");
    if ( msg == 0)
    {
       if ( strlen( param[0]) > 9)
@@ -577,7 +598,7 @@ char *validate(MYSQL *connector, char** param){
    // Cuenta-hacia debe ser numerica
    // La cuenta-hacia debe existir en el maestro de cuentas
    // La cuenta-hacia debe ser diferente de la cuenta-desde
-   printf("::: Cuenta-hacia");
+   printf("::: Cuenta-hacia\n");
    if ( msg == 0)
    {
       if ( strlen( param[1]) > 9)
@@ -593,7 +614,7 @@ char *validate(MYSQL *connector, char** param){
    // Valor
    // El valor debe ser numerico de menos de 10 cifras
    // El valor debe ser un numero positivo
-   printf("::: Valor");
+   printf("::: Valor\n");
    if (msg == 0)
    {
       if ( strlen(param[2]) >= 10)
@@ -607,7 +628,7 @@ char *validate(MYSQL *connector, char** param){
 
    // Token
    // El token debe estar habilitado
-   printf( "::: Token");
+   printf( "::: Token\n");
    if ( msg == 0 )
    {
 	   if ( ! isTokenValid( connector, param[3]))
@@ -632,7 +653,7 @@ char *validate(MYSQL *connector, char** param){
 } // validate
 
 
-/*
+/********************************************************************************
    Cifra un buffer con AES-128 en modo CBC utilizando 
    la biblioteca MCrypt de Linux 
     
@@ -665,7 +686,7 @@ int encrypt(
 } // encrypt
 
 
-/*
+/*************************************************************************
 Descifra un texto cifrado con AES-128 modo CBC utilizando
 la biblioteca MCrypt de Linux 
     
@@ -698,8 +719,9 @@ int decrypt(
 
 
 /***********************************************************************
- * Begin method
- */#include <mcrypt.h>
+ * Main method
+ */
+
 
 int main (int argc, char *argv[]) {
 
@@ -717,24 +739,24 @@ int main (int argc, char *argv[]) {
    MYSQL *connector;  // Conexión a la bdd
 
    // Connect to database
+   
    char *server   = "localhost";
    char *user     = "advlogin";
    char *password = "Hard+20.";
    char *database = "advlogin";
    
    int    buffer_len; 
-   char   buf[32000];
+   char   *buf;
    int    user_id = atoi( argv[0]);
    char   *IV     = "AAAAAAAAAAAAAAAA";
    char   key[32];
    int    key_size = 16;
 
-
+   buf = (char *) malloc(sizeof(char) * (32000));
 
    connector = mysql_init(NULL);
    if (!mysql_real_connect(connector, server, user, password, database, 0, NULL, 0))
    {
-      // If error, print the error in the standar output
       fprintf(stderr, "%s\n", mysql_error(connector));
       exit(1);
    }
@@ -743,16 +765,15 @@ int main (int argc, char *argv[]) {
    ciphered = fopen("movements.cif", "r");
    if (ciphered == NULL)
    {
-      printf("Archivo inexistente!\n");
+      printf("*** Archivo inexistente!\n");
       exit(1);
    }
   
    // Descifre el archivo de movimientos
    // Obtenga la llave de cifrado con base en el usuario recibido 
     memset( key, 0, 32 * sizeof(char));
-
     if ( !getAESKey( connector, user_id,  key)) {
-		printf( "No pudo obtener la llave de cifrado");
+		printf( "No pudo obtener la llave de cifrado\n");
 		exit(1);
     } 
     
@@ -760,15 +781,17 @@ int main (int argc, char *argv[]) {
    file = fopen("./movements.txt", "w");
    if (file == NULL)
    {
-      printf("No pudo crear archivo de movimientos!\n");
+      printf("*** No pudo crear archivo de movimientos!\n");
       exit(1);
    }
    
-    printf("::: Voy a descifrar");
     if ( ! feof( ciphered)) {
 		buffer_len = fread( buf, sizeof(char), 32000, ciphered);
-		printf("::: length= %d", buffer_len);
-        decrypt(buf, buffer_len, IV, key, key_size);
+        int ok = decrypt(buf, buffer_len, IV, key, key_size);
+        if ( ok ){
+            printf("*** No pudo descifrar correctamente");
+            exit(1);
+        }
         fwrite( buf, sizeof(char), buffer_len, file);
     }
     fclose(ciphered);
@@ -778,7 +801,7 @@ int main (int argc, char *argv[]) {
    file = fopen("movements.txt", "r");
    if (file == NULL)
    {
-      printf("Archivo claro de movimientos inexistente!\n");
+      printf("*** Archivo claro de movimientos inexistente!\n");
       exit(1);
    }
 
@@ -787,9 +810,10 @@ int main (int argc, char *argv[]) {
    mysql_autocommit( connector, 0);  // Auto commit off
    while (!feof(file))
    {
+      memset( line, 0, 80 * sizeof(char));
       fgets(line, 80, file);
-      printf("%s", line);
       nM++;
+
 
       // Obtenga los componentes de la transaccion
       p = q = line;
@@ -799,9 +823,9 @@ int main (int argc, char *argv[]) {
             printf("*** Error: Linea %d agotada, Falta parametro  %d", nM, i);
             break;
          }
-
+         
          param[i] = (char *)getParms(&p, &q);
-         printf("%s\n", param[i]);
+         printf("%s\n", param[i]); 
          if (param[i] == 0) {
             printf("*** Error: Falta parametro  %d", i);
             break;
@@ -845,7 +869,9 @@ int main (int argc, char *argv[]) {
    free(param);
    fclose(file);
    return(0);
+   
 } // main
+
 
 
 
