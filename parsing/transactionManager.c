@@ -788,6 +788,7 @@ int main (int argc, char *argv[]) {
    
     if ( ! feof( ciphered)) {
 		buffer_len = fread( buf, sizeof(char), 32000, ciphered);
+		printf("::: lei del cifrado buffer_len=%d", buffer_len);
         int ok = decrypt(buf, buffer_len, IV, key, key_size);
         fwrite( buf, sizeof(char), buffer_len, stdout);
         if ( ok ){
