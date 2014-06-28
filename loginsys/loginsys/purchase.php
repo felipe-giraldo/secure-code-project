@@ -6,8 +6,10 @@
       die('Direct access to this location is not allowed.');
 ?>
 
-<?php $userrow = $user->getUsers();
-    $useraccounts = $core->getAccounts();
+<?php 
+	//$userrow = $user->getUsers();
+	$row = $user->getUserData();
+    $useraccounts = $core->getAccounts($row->id);
     //$vendors = $core->getVendors();
 ?>
 <?php //echo Core::doForm("processTransfer","ajax/controller_tr.php");

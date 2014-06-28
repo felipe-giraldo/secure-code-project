@@ -41,8 +41,13 @@
        */
       private function startSession()
       {
-          if (strlen(session_id()) < 1)
+          if (strlen(session_id()) < 1):
+			  ini_set('session.use_trans_sid', 0);
+			  ini_set('session.cookie_httponly', 1);
+			  ini_set('session.cookie_secure', 1);
+			  ini_set('session.use_only_cookies', 1);
               session_start();
+		 endif;
 
           $this->logged_in = $this->loginCheck();
 
@@ -555,8 +560,6 @@
 			  );
 			  
 			  self::$db->insert(self::uTable, $data);
-              
-              
               
           } else
               print Filter::msgStatus();

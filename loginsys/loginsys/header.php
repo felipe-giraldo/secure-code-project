@@ -41,6 +41,11 @@ $(document).ready(function(){
    $("#dForm").validationEngine();
 });
 </script>
+<script language="JavaScript"> 
+<!--// evito que se cargue en otro frame 
+if (top.location != self.location)top.location = self.location; 
+//--> 
+</script>
 </head>
 <body>
 <div id="loader" style="display:none"></div>
@@ -49,6 +54,7 @@ $(document).ready(function(){
 <div class="col grid_8">
 <!--<div id="logo"><a href="index.php"><?php echo ($core->logo) ? '<img src="'.SITEURL.'/uploads/'.$core->logo.'" alt="'.$core->site_name.'" class="logo"/>': $core->site_name;?></a></div>-->
 </div>
+
     <?php
         if ($user->logged_in): ?>
 <div class="col grid_21">

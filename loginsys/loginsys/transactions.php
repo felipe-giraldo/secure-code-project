@@ -40,18 +40,18 @@ foreach ($useraccounts as $accounts): ?>
         </tr>
       </thead>
       <tbody>
-        <?php foreach ($userrow as $row):?>
+        <?php foreach ($userrow as $trans):?>
         <tr>
-          <th><?php echo $row->id;?>.</th>
-          <td><?php echo $row->from_account;?></td>
-          <td><?php echo $row->to_account;?></td>
-          <td><?php echo $row->ammount;?></td>
-          <td><?php echo $row->token;?></td>
-          <td><?php echo gmdate("Y-m-d H:i:s", $row->transaction_date);?></td>
-          <td><?php echo ($row->transaction_type == 1) ? 'Transfer' : 'Online Purchase';?></td>
-          <?php if($row->transaction_state == 1):
+          <th><?php echo $trans->id;?>.</th>
+          <td><?php echo $trans->from_account;?></td>
+          <td><?php echo $trans->to_account;?></td>
+          <td><?php echo $trans->ammount;?></td>
+          <td><?php echo $trans->token;?></td>
+          <td><?php echo gmdate("Y-m-d H:i:s", $trans->transaction_date);?></td>
+          <td><?php echo ($trans->transaction_type == 1) ? 'Transfer' : 'Online Purchase';?></td>
+          <?php if($trans->transaction_state == 1):
               print('<td>Approved</td>');
-          elseif($row->transaction_state == 2):
+          elseif($trans->transaction_state == 2):
               print('<td>Rejected</td>');
           else:
               print('<td>Pending</td>');
@@ -60,7 +60,7 @@ foreach ($useraccounts as $accounts): ?>
           
         </tr>
         <?php endforeach;?>
-        <?php unset($row);?>
+        <?php unset($trans);?>
     </table>
     <?php echo $pager->display_pages();?> </div>
 </section>
