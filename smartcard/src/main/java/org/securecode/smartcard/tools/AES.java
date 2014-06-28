@@ -84,7 +84,7 @@ public class AES {
         try {
             Cipher cipher = Cipher.getInstance(props.getPropiedad("aes.encrypt.instance"), props.getPropiedad("aes.encrypt.provider"));
             SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES");
-            cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(encryptionKey.getBytes("UTF-8")));
+            cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec("AAAAAAAAAAAAAAAA".getBytes("UTF-8")));
             return cipher.doFinal(plainText.getBytes("UTF-8"));
         }
         catch (Exception ex) {
@@ -98,7 +98,7 @@ public class AES {
         try {
             Cipher cipher = Cipher.getInstance(props.getPropiedad("aes.decrypt.instance"), props.getPropiedad("aes.decrypt.provider"));
             SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES");
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(encryptionKey.getBytes("UTF-8")));
+            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec("AAAAAAAAAAAAAAAA".getBytes("UTF-8")));
             return new String(cipher.doFinal(cipherText), "UTF-8");
         }
         catch (Exception ex) {
