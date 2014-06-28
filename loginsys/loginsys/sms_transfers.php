@@ -9,16 +9,11 @@
 <?php //$userrow = $user->getUsers();
     $row = $user->getUserData();
     $useraccounts = $core->getAccounts($row->id);
-    
-    $temp_file = tempnam(sys_get_temp_dir(), 'Tux');
-
-echo $temp_file . '<br>';
-echo sys_get_temp_dir()
 ?>
 <?php //echo Core::doForm("processTransfer","ajax/controller_tr.php");
     if (isset($_POST['btnTransfer'])):
         $row = $user->getUserData();
-        $core->smcTransfer($row->id);
+        $core->makeTransfer($row->id, 1);
         //haceTransfer($row->id, $_POST['t_token'], $_POST['origin_account'], $_POST['destination_account'], $_POST['ammount']);
         //redirect_to("main.php?do=transactions");
     endif;
@@ -31,7 +26,7 @@ echo sys_get_temp_dir()
 <section class="widget">
   <header>
     <div class="row">
-      <h1><i class="icon-reorder"></i> Smart Card transfer</h1>
+      <h1><i class="icon-reorder"></i> Funds transfer</h1>
       
     </div>
   </header>
@@ -61,13 +56,7 @@ echo sys_get_temp_dir()
           </section>
             <section class="col col-4">
             <label class="input"> <i class="icon-prepend icon-search"></i>
-              <input type="text" name="t_token" class="validate[required, minSize[15], maxSize[15] ]" id="search-input" placeholder="Your PIN">
-            </label>
-            <div id="suggestions"></div>
-          </section>
-            <section class="col col-4">
-            <label class="input"> <i class="icon-prepend icon-search"></i>
-              <input type="text" name="v_token" class="validate[required, minSize[15], maxSize[15] ]" id="search-input" placeholder="Token for transaction">
+              <input type="text" name="t_token" class="validate[required, minSize[15], maxSize[15] ]" id="search-input" placeholder="Token for transaction">
             </label>
             <div id="suggestions"></div>
           </section>

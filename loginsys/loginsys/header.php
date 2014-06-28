@@ -59,7 +59,7 @@ $(document).ready(function(){
 	  <a href="main.php?do=batchTransfers"><i class="icon-exchange"></i>Batch Transfers</a>	  
       <a href="main.php?do=purchase"><i class="icon-lock"></i> Purchases</a> 
       <a href="main.php?do=download"><i class="icon-hdd"></i> Downloads</a> 
-      <a href="main.php?do=sms_transfer"><i class="icon-cogs"></i> SMC Transfers</a> 
+      <a href="main.php?do=sms_transfers"><i class="icon-cogs"></i> SMC Transfers</a> 
     <!--<a href="contact.php"><i class="icon-envelope"></i> Contact Us</a>-->
     <?php if($user->logged_in):?>
     <a href="logout.php"><i class="icon-off"></i> Log Off</a>
