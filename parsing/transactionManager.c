@@ -57,6 +57,55 @@ uint k[64] = {
 #include <mysql.h>
 #include <mcrypt.h>
 
+/*********************************************************
+ * Trims leading and trailing whitespace
+ * 
+ * str - String to be trimmed in place
+ */
+char *trim(char *str)
+{
+    size_t len = 0;
+    char *frontp = str - 1;
+    char *endp = NULL;
+
+    if( str == NULL )
+            return NULL;
+
+    if( str[0] == '\0' )
+            return str;
+
+    len = strlen(str);
+    endp = str + len;
+
+    /* Move the front and back pointers to address
+     * the first non-whitespace characters from
+     * each end.
+     */
+    while( isspace(*(++frontp)) );
+    while( isspace(*(--endp)) && endp != frontp );
+
+    if( str + len - 1 != endp )
+            *(endp + 1) = '\0';
+    else if( frontp != str &&  endp == frontp )
+            *str = '\0';
+
+    /* Shift the string so that it starts at str so
+     * that if it's dynamically allocated, we can
+     * still free it on the returned pointer.  Note
+     * the reuse of endp to mean the front of the
+     * string buffer now.
+     */
+    endp = str;
+    if( frontp != str )
+    {
+            while( *frontp ) *endp++ = *frontp++;
+            *endp = '\0';
+    }
+
+
+    return str;
+}// trim
+
 
 /***********************************************************************
  * Method for splitting words with a delimiter
@@ -72,14 +121,10 @@ uint k[64] = {
  */
 char *getParms(char **p, char **q) {
 
-   char *r = 0;   // r: Result param
+   char *r = "";   // r: Result param
    char *i = *p;  // i: starting position
    char *j = *q;  // j: running end position
    int   l = 0;   // l: number of chars in param
-
-   // trim  leading whitespace
-   while ( *j == ' ' || *j == '\t' || *j == '\n' )
-      j++;
 
    // if input not exhausted
    if ( *j)
@@ -90,11 +135,11 @@ char *getParms(char **p, char **q) {
          l++;
          j++;
       }
-      
-      // Hit end of parm => get it
-      r = (char *) malloc(sizeof(char) * (l + 1));
+      // Hit end of parm => get it   
+      r = (char *) malloc(sizeof(char) * (l + 1)); *r= 0;
       strncpy(r, i, l);
       r[l] = 0;
+      trim (r);
 
       // Update pointers for the next parm
       *p = (*j == 0)? j : j + 1;
@@ -145,11 +190,11 @@ int insertTransaction( MYSQL *connector, char *fromAccount, char *toAccount, cha
 
    // Send the SQL query
    char *queryString = (char *) malloc(200);
-   char *table = "transactions";
 
    // Query example: INSERT INTO transactions VALUES (null, '1234567890', '2345678901', 1000, 'TOKEN-123456789', 2014-06-21, 99, 1)
-   sprintf(queryString, "INSERT INTO %s VALUES (null, %s, %s, %d, %s, '%s', %d, %d)",
-           table, fromAccount, toAccount, atoi(value), token, getDate(), 99, type);
+   // transaction table columns : id	from_account	to_account	ammount	token	transaction_date	transaction_state	transaction_type
+   sprintf(queryString, "INSERT INTO transactions VALUES (null, %s, %s, %d, '%s', '%s', %d, %d)",
+           fromAccount, toAccount, atoi(value), token, getDate(), 99, type);
 
    if (mysql_query(connector, queryString))
    {
@@ -157,15 +202,33 @@ int insertTransaction( MYSQL *connector, char *fromAccount, char *toAccount, cha
       return 2;
    }
    resultSet = mysql_use_result(connector);
-
-   // Marque el token como usado
-   sprintf(queryString, "UPDATE user_token set used=1 WHERE token_id= %s", token);
+   
+   // Actualice saldo de cuenta desde
+   sprintf(queryString, "UPDATE account SET money = (money - %d) where id_account = '%s'", atoi(value), fromAccount);
    if (mysql_query(connector, queryString))
    {
       fprintf(stderr, "%s\n", mysql_error(connector));
       return 2;
    }
+   resultSet = mysql_use_result(connector);
 
+   // Actualice saldo de cuenta hacia
+   sprintf(queryString, "UPDATE account SET money = (money + %d) where id_account = '%s'", atoi(value), toAccount);
+   if (mysql_query(connector, queryString))
+   {
+      fprintf(stderr, "%s\n", mysql_error(connector));
+      return 2;
+   }
+   resultSet = mysql_use_result(connector);
+
+
+   // Marque el token como usado
+   sprintf(queryString, "UPDATE user_token SET used=1 WHERE token_id= '%s'", token);
+   if (mysql_query(connector, queryString))
+   {
+      fprintf(stderr, "%s\n", mysql_error(connector));
+      return 2;
+   }
    // Free resources
    mysql_free_result(resultSet);
    return 0;
@@ -245,6 +308,41 @@ int accountExists (MYSQL *connector,  char *accNumber)
 
 } // accountExists
 
+
+/**********************************************************************
+ * Verifica si hay suficiente dinero en el saldo de la cuenta
+ * 
+ * connector - conexion a la bdd
+ * cuenta -   Cuenta de la que se van a retirar fondos
+ * valor  -   Valor a retirar
+ */
+ int  enoughMoney( MYSQL *connector, char *cuenta,  int valor)
+ {
+   int enough = 0;
+   MYSQL_RES *resultSet;
+   char *queryString = (char *)malloc( 200 * sizeof(char));
+   memset( queryString, 0, 200 * sizeof(char));
+
+   sprintf(queryString, "SELECT  money  FROM account WHERE id_account = '%s'", cuenta);
+   if (mysql_query(connector, queryString))
+   {
+      fprintf(stderr, "%s\n", mysql_error(connector));
+      return 0;
+   }
+
+   resultSet = mysql_store_result(connector);
+   if (  resultSet != 0 && mysql_num_rows( resultSet) != 0)
+   {   
+      MYSQL_ROW row = mysql_fetch_row ( resultSet);
+      enough  = atoi(row[0]) >= valor;
+   }
+
+   mysql_free_result(resultSet);
+   return enough;
+	 
+	 
+ }// enoughMoney
+
 /********************************************************************** 
   Verifica si un token ha sido utilizado
  
@@ -259,7 +357,7 @@ int isTokenValid (MYSQL *connector,  char *token_id)
    char *queryString = (char *)malloc( 200 * sizeof(char));
    memset( queryString, 0, 200 * sizeof(char));
 
-   sprintf(queryString, "SELECT  token_id, user_id, used  FROM user_token WHERE token_id = %s", token_id);
+   sprintf(queryString, "SELECT  token_id, user_id, used  FROM user_token WHERE token_id = '%s'", token_id);
    if (mysql_query(connector, queryString))
    {
       fprintf(stderr, "%s\n", mysql_error(connector));
@@ -270,7 +368,7 @@ int isTokenValid (MYSQL *connector,  char *token_id)
    if (  resultSet != 0 && mysql_num_rows( resultSet) != 0)
    {   
       MYSQL_ROW row = mysql_fetch_row ( resultSet);
-      valid  = atoi(row[2]);
+      valid  = atoi(row[2]) != 0? 0: 1;
    }
 
    mysql_free_result(resultSet);
@@ -450,7 +548,7 @@ int getAESKey( MYSQL *connector, int user_id,  char *key) {
    sha256_init(&ctx);
    sha256_update(&ctx,fixKey,strlen((char*)fixKey));
    sha256_final(&ctx,hash);
-   print_hash(hash);
+   //print_hash(hash);
  
    
    int i = 0;
@@ -527,6 +625,7 @@ time_t tm_to_time_t_utc( struct tm * timeptr ) {
 }// tm_to_time_t_utc
 
 
+
 /**********************************************************************
    Valida los parametros de una transaccion
  
@@ -540,8 +639,8 @@ time_t tm_to_time_t_utc( struct tm * timeptr ) {
  
 */
 char *validate(MYSQL *connector, char** param){
-
-   char        *msg = 0;    
+   int   debug = 0;
+   char  *msg  = 0;    
 
 
    // Ejemplo de una transaccion
@@ -582,7 +681,7 @@ char *validate(MYSQL *connector, char** param){
    // Cuenta debe tener 9 caracteres o menos
    // Cuenta debe ser numerica
    // La cuenta-desde debe existir en el maestro de cuentas
-   printf("::: Cuenta-desde\n");
+   if(debug) printf("::: Cuenta-desde\n");
    if ( msg == 0)
    {
       if ( strlen( param[0]) > 9)
@@ -598,7 +697,7 @@ char *validate(MYSQL *connector, char** param){
    // Cuenta-hacia debe ser numerica
    // La cuenta-hacia debe existir en el maestro de cuentas
    // La cuenta-hacia debe ser diferente de la cuenta-desde
-   printf("::: Cuenta-hacia\n");
+   if(debug) printf("::: Cuenta-hacia\n");
    if ( msg == 0)
    {
       if ( strlen( param[1]) > 9)
@@ -607,31 +706,36 @@ char *validate(MYSQL *connector, char** param){
            msg = "Cuenta-hacia debe ser numerica";
       else if ( !accountExists(connector, param[1]))
            msg = "Cuenta-hacia no esta registrada";
-      else if (strncmp(param[1], param[2], strlen(param[1])) == 0)
+      else if (strncmp(param[0], param[1], strlen(param[1])) == 0)
             msg = "Cuenta-desde no puede ser igual a cuenta-hacia";
    }
 
    // Valor
    // El valor debe ser numerico de menos de 10 cifras
    // El valor debe ser un numero positivo
-   printf("::: Valor\n");
+   // El valor debe ser menor o igual al saldo de la cuenta-desde
+   if(debug) printf("::: Valor\n");
    if (msg == 0)
    {
       if ( strlen(param[2]) >= 10)
          msg = "Valor no puede tener más  de 9 dígitos";
       else if (! isNumber(param[2]))
-         msg = "Valor debe ser numérico y menor de 10 dígitos";
+         msg = "Valor debe ser numérico, positivo y menor de 10 dígitos";
       else if ( atof(param[2]) <= 0.0)
             msg = "Valor de la transacción debe ser un número positivo";
+      else if ( !enoughMoney( connector, param[0], atoi(param[2])))
+            msg = "Valor de la transaccion excede el saldo de la cuenta-desde";
    }
    
 
    // Token
    // El token debe estar habilitado
-   printf( "::: Token\n");
+   if(debug) printf( "::: Token\n");
    if ( msg == 0 )
    {
-	   if ( ! isTokenValid( connector, param[3]))
+	   if ( !strlen(param[3]))
+	      msg = "Token no puede ser nulo";
+	   else if ( ! isTokenValid( connector, param[3]))
 	      msg = "Token no existe, o ya ha sido utilizado";
    }
 
@@ -639,7 +743,7 @@ char *validate(MYSQL *connector, char** param){
    // El tipo de transaccion debe tener longitud 1
    // El tipo de transaccion debe ser numerico
    // El tipo de transaccion debe ser 0 o 1
-   if ( msg == 0)
+   if(debug) if ( msg == 0)
    {   
       if (strlen( param[4]) > 771)
          msg = "Longitud del tipo de transacción debe ser 1";
@@ -706,7 +810,6 @@ int decrypt(
 {
    MCRYPT td = mcrypt_module_open("rijndael-128", NULL, "cbc", NULL);
    int blocksize = mcrypt_enc_get_block_size(td);
-   printf("::: blocksize= %d buffer_len=%d\n", blocksize, buffer_len);
    if ( buffer_len % blocksize != 0 )
    {
       return 1;
@@ -725,10 +828,12 @@ int decrypt(
 
 
 int main (int argc, char *argv[]) {
-
-   char line[81];     // Linea de movimientos
-   FILE* ciphered;    // Archivo cifrado de transacciones
-   FILE* file;        // Archivo de movimientos
+   int   debug=0;          // debug flag
+   char line[81];         // Linea de movimientos
+   char  *cipheredName;   // Nombre basico del archivo a procesar
+   FILE* ciphered;        // Archivo cifrado de transacciones
+   char *plainName;       // Nombre basico del archivo plano descifrado
+   FILE* file;            // Archivo de movimientos
    
    char **param = (char **)malloc( sizeof( char *) * 7); // Parametros en la linea
    char *msg;         // Mensaje de error
@@ -763,12 +868,16 @@ int main (int argc, char *argv[]) {
    }
 
    // Abra el archivo de transacciones
-   ciphered = fopen("movements.cif", "r");
+   cipheredName = malloc( sizeof( char) * 200);
+   strncpy( cipheredName, argv[1],100);
+   strcat( cipheredName,".cif");
+   ciphered = fopen(cipheredName, "r");
    if (ciphered == NULL)
    {
       printf("*** Archivo inexistente!\n");
       exit(1);
    }
+   printf("::: Ciphered transaction file=%s opened\n", cipheredName);
   
    // Descifre el archivo de movimientos
    // Obtenga la llave de cifrado con base en el usuario recibido 
@@ -779,29 +888,34 @@ int main (int argc, char *argv[]) {
     } 
     
    // Descifre el archivo y guardelo en el archivo "movements.txt"
-   file = fopen("./movements.txt", "w");
+   plainName = malloc( sizeof(char) * 200);
+   strncpy( plainName, argv[1], 100);
+   strcat(plainName, ".txt");
+   file = fopen(plainName, "w");
    if (file == NULL)
    {
       printf("*** No pudo crear archivo de movimientos!\n");
       exit(1);
    }
+   printf("::: Plain text transaction file %s opened\n", plainName);
    
     if ( ! feof( ciphered)) {
 		buffer_len = fread( buf, sizeof(char), 32000, ciphered);
-		printf("::: lei del cifrado buffer_len=%d", buffer_len);
         int ok = decrypt(buf, buffer_len, IV, key, key_size);
-        fwrite( buf, sizeof(char), buffer_len, stdout);
+        if(debug) fwrite( buf, sizeof(char), buffer_len, stdout);
         if ( ok ){
             printf("*** No pudo descifrar correctamente");
             exit(1);
         }
         fwrite( buf, sizeof(char), buffer_len, file);
+        if(debug) printf("::: file %s decrypted in %s. Length=%d\n", cipheredName, plainName, buffer_len);
     }
     fclose(ciphered);
     fclose(file);
     
    // Procese el archivo descifrado
-   file = fopen("movements.txt", "r");
+   printf("\n");
+   file = fopen(plainName, "r");
    if (file == NULL)
    {
       printf("*** Archivo claro de movimientos inexistente!\n");
@@ -819,6 +933,11 @@ int main (int argc, char *argv[]) {
         break;
         
       nM++;
+      trim(line);
+      if (strlen(line) == 0)
+         continue;
+         
+      if(debug) printf("transaction [%s]\n", line); fflush(stdout);
 
 
       // Obtenga los componentes de la transaccion
@@ -831,7 +950,7 @@ int main (int argc, char *argv[]) {
          }
          
          param[i] = (char *)getParms(&p, &q);
-         printf("%s\n", param[i]); 
+         if(debug)printf("field[%d]=%s\n", i, param[i]); 
          if (param[i] == 0) {
             printf("*** Error: Falta parametro  %d", i);
             break;
@@ -841,7 +960,6 @@ int main (int argc, char *argv[]) {
          continue;
 
       // Valide cada componente
-      printf( "::: Voy a validar");
       msg = validate( connector, param);
       if ( msg != 0) {
          nError++;
@@ -850,7 +968,6 @@ int main (int argc, char *argv[]) {
       }
 
       // Actualice la base de datos con la nueva transaccion
-      printf("::: Voy a actualizar Bdd");
       int res = insertTransaction(connector, param[0], param[1], param[2], param[3], atoi(param[4]));
       if (res)
          nError++;
