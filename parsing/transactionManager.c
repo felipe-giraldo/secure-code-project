@@ -44,9 +44,9 @@ uint k[64] = {
    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
 };
- 
+
 // ----------------------------------------------------------------------
-                              
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -59,7 +59,7 @@ uint k[64] = {
 
 /*********************************************************
  * Trims leading and trailing whitespace
- * 
+ *
  * str - String to be trimmed in place
  */
 char *trim(char *str)
@@ -130,12 +130,12 @@ char *getParms(char **p, char **q) {
    if ( *j)
    {
       // search for the ending ','  or endOfString
-      while (*j != ',' && *j != 0 && l <= 80)
+      while (*j != '|' && *j != 0 && l <= 80)
       {
          l++;
          j++;
       }
-      // Hit end of parm => get it   
+      // Hit end of parm => get it
       r = (char *) malloc(sizeof(char) * (l + 1)); *r= 0;
       strncpy(r, i, l);
       r[l] = 0;
@@ -202,7 +202,7 @@ int insertTransaction( MYSQL *connector, char *fromAccount, char *toAccount, cha
       return 2;
    }
    resultSet = mysql_use_result(connector);
-   
+
    // Actualice saldo de cuenta desde
    sprintf(queryString, "UPDATE account SET money = (money - %d) where id_account = '%s'", atoi(value), fromAccount);
    if (mysql_query(connector, queryString))
@@ -232,14 +232,14 @@ int insertTransaction( MYSQL *connector, char *fromAccount, char *toAccount, cha
    // Free resources
    mysql_free_result(resultSet);
    return 0;
-   
+
 } // insertTransaction
 
 /***********************************************************************
  * Verifica si un string es numerico
  * @param value String a verificar
- * 
- * @return int  1 si es numerico, 0 si no lo es 
+ *
+ * @return int  1 si es numerico, 0 si no lo es
  *         null strings se consideran no numericos
  *         strings de más de 15  digitos se consideran no numericos
  */
@@ -251,8 +251,8 @@ int isNumber ( char *value)
 
 
    while (*p && i < 15 && isdigit(*p)  )
-   {  
-      i++; 
+   {
+      i++;
       p++;
    }
 
@@ -263,9 +263,9 @@ int isNumber ( char *value)
 /***********************************************************************
  * Verifica si un string es alfanumerico
  * @param value String a verificar
- * 
- * @return int  1 si es alfanumerico, 0 si no lo es. 
- *         Null strings se consideran no alphanumeric 
+ *
+ * @return int  1 si es alfanumerico, 0 si no lo es.
+ *         Null strings se consideran no alphanumeric
  */
 int isAlphaNumeric ( char *value)
 {
@@ -279,9 +279,9 @@ int isAlphaNumeric ( char *value)
 
 } // isAlphaNumeric
 
-/********************************************************************** 
+/**********************************************************************
   Verifica si una cuenta existe en el maestro de cuentas
- 
+
   connector - MYSQL db connector
   accCode - Código de la cuenta  a verificar
   return   0 si la cuenta no existe, 1 si la cuenta esta registrada
@@ -311,7 +311,7 @@ int accountExists (MYSQL *connector,  char *accNumber)
 
 /**********************************************************************
  * Verifica si hay suficiente dinero en el saldo de la cuenta
- * 
+ *
  * connector - conexion a la bdd
  * cuenta -   Cuenta de la que se van a retirar fondos
  * valor  -   Valor a retirar
@@ -332,20 +332,20 @@ int accountExists (MYSQL *connector,  char *accNumber)
 
    resultSet = mysql_store_result(connector);
    if (  resultSet != 0 && mysql_num_rows( resultSet) != 0)
-   {   
+   {
       MYSQL_ROW row = mysql_fetch_row ( resultSet);
       enough  = atoi(row[0]) >= valor;
    }
 
    mysql_free_result(resultSet);
    return enough;
-	 
-	 
+
+
  }// enoughMoney
 
-/********************************************************************** 
+/**********************************************************************
   Verifica si un token ha sido utilizado
- 
+
   connector - MYSQL db connector
   token     - Código de la cuenta  a verificar
   return   0 si el token es valido, 1 si el token es invalido
@@ -366,7 +366,7 @@ int isTokenValid (MYSQL *connector,  char *token_id)
 
    resultSet = mysql_store_result(connector);
    if (  resultSet != 0 && mysql_num_rows( resultSet) != 0)
-   {   
+   {
       MYSQL_ROW row = mysql_fetch_row ( resultSet);
       valid  = atoi(row[2]) != 0? 0: 1;
    }
@@ -378,14 +378,14 @@ int isTokenValid (MYSQL *connector,  char *token_id)
 
 /*****************************************************************************
  * Aplica la transformación SHA-2
- * 
+ *
  * ctx  - Contexto
- * data - Datos 
+ * data - Datos
  */
 void sha256_transform(SHA256_CTX *ctx, uchar data[])
-{  
+{
    uint a,b,c,d,e,f,g,h,i,j,t1,t2,m[64];
-      
+
    for (i=0,j=0; i < 16; ++i, j += 4)
       m[i] = (data[j] << 24) | (data[j+1] << 16) | (data[j+2] << 8) | (data[j+3]);
    for ( ; i < 64; ++i)
@@ -399,7 +399,7 @@ void sha256_transform(SHA256_CTX *ctx, uchar data[])
    f = ctx->state[5];
    g = ctx->state[6];
    h = ctx->state[7];
-   
+
    for (i = 0; i < 64; ++i) {
       t1 = h + EP1(e) + CH(e,f,g) + k[i] + m[i];
       t2 = EP0(a) + MAJ(a,b,c);
@@ -412,7 +412,7 @@ void sha256_transform(SHA256_CTX *ctx, uchar data[])
       b = a;
       a = t1 + t2;
    }
-   
+
    ctx->state[0] += a;
    ctx->state[1] += b;
    ctx->state[2] += c;
@@ -421,19 +421,19 @@ void sha256_transform(SHA256_CTX *ctx, uchar data[])
    ctx->state[5] += f;
    ctx->state[6] += g;
    ctx->state[7] += h;
-   
+
 }  //sha256_transform
- 
+
 /***********************************************************
  * Inicializa el estado de SHA-2
- * 
+ *
  * ctx - Contexto
  */
 void sha256_init(SHA256_CTX *ctx)
-{  
-   ctx->datalen = 0; 
-   ctx->bitlen[0] = 0; 
-   ctx->bitlen[1] = 0; 
+{
+   ctx->datalen = 0;
+   ctx->bitlen[0] = 0;
+   ctx->bitlen[1] = 0;
    ctx->state[0] = 0x6a09e667;
    ctx->state[1] = 0xbb67ae85;
    ctx->state[2] = 0x3c6ef372;
@@ -442,81 +442,81 @@ void sha256_init(SHA256_CTX *ctx)
    ctx->state[5] = 0x9b05688c;
    ctx->state[6] = 0x1f83d9ab;
    ctx->state[7] = 0x5be0cd19;
-   
+
 }// sha256_init
- 
+
 /**********************************************************
  * Actualiza el running value del hash SHA-2
- * 
+ *
  * ctx  - Contexto
  * data - datos
  * len  - Longitud
  */
 void sha256_update(SHA256_CTX *ctx, uchar data[], uint len)
-{  
+{
    uint i;
-   
-   for (i=0; i < len; ++i) { 
-      ctx->data[ctx->datalen] = data[i]; 
-      ctx->datalen++; 
-      if (ctx->datalen == 64) { 
+
+   for (i=0; i < len; ++i) {
+      ctx->data[ctx->datalen] = data[i];
+      ctx->datalen++;
+      if (ctx->datalen == 64) {
          sha256_transform(ctx,ctx->data);
-         DBL_INT_ADD(ctx->bitlen[0],ctx->bitlen[1],512); 
-         ctx->datalen = 0; 
-      }  
-   }  
-}  //sha256_update 
+         DBL_INT_ADD(ctx->bitlen[0],ctx->bitlen[1],512);
+         ctx->datalen = 0;
+      }
+   }
+}  //sha256_update
 
 /*********************************************************
  * Culmina la generación del SHA-2 hash
- * 
+ *
  * ctx - Contexto
  * hash - Hash producido
  */
 void sha256_final(SHA256_CTX *ctx, uchar hash[])
-{  
-   uint i; 
-   
-   i = ctx->datalen; 
-   
-   // Pad whatever data is left in the buffer. 
-   if (ctx->datalen < 56) { 
-      ctx->data[i++] = 0x80; 
-      while (i < 56) 
-         ctx->data[i++] = 0x00; 
-   }  
-   else { 
-      ctx->data[i++] = 0x80; 
-      while (i < 64) 
-         ctx->data[i++] = 0x00; 
+{
+   uint i;
+
+   i = ctx->datalen;
+
+   // Pad whatever data is left in the buffer.
+   if (ctx->datalen < 56) {
+      ctx->data[i++] = 0x80;
+      while (i < 56)
+         ctx->data[i++] = 0x00;
+   }
+   else {
+      ctx->data[i++] = 0x80;
+      while (i < 64)
+         ctx->data[i++] = 0x00;
       sha256_transform(ctx,ctx->data);
-      memset(ctx->data,0,56); 
-   }  
-   
-   // Append to the padding the total message's length in bits and transform. 
+      memset(ctx->data,0,56);
+   }
+
+   // Append to the padding the total message's length in bits and transform.
    DBL_INT_ADD(ctx->bitlen[0],ctx->bitlen[1],ctx->datalen * 8);
-   ctx->data[63] = ctx->bitlen[0]; 
-   ctx->data[62] = ctx->bitlen[0] >> 8; 
-   ctx->data[61] = ctx->bitlen[0] >> 16; 
-   ctx->data[60] = ctx->bitlen[0] >> 24; 
-   ctx->data[59] = ctx->bitlen[1]; 
-   ctx->data[58] = ctx->bitlen[1] >> 8; 
-   ctx->data[57] = ctx->bitlen[1] >> 16;  
-   ctx->data[56] = ctx->bitlen[1] >> 24; 
+   ctx->data[63] = ctx->bitlen[0];
+   ctx->data[62] = ctx->bitlen[0] >> 8;
+   ctx->data[61] = ctx->bitlen[0] >> 16;
+   ctx->data[60] = ctx->bitlen[0] >> 24;
+   ctx->data[59] = ctx->bitlen[1];
+   ctx->data[58] = ctx->bitlen[1] >> 8;
+   ctx->data[57] = ctx->bitlen[1] >> 16;
+   ctx->data[56] = ctx->bitlen[1] >> 24;
    sha256_transform(ctx,ctx->data);
-   
+
    // Since this implementation uses little endian byte ordering and SHA uses big endian,
-   // reverse all the bytes when copying the final state to the output hash. 
-   for (i=0; i < 4; ++i) { 
-      hash[i]    = (ctx->state[0] >> (24-i*8)) & 0x000000ff; 
-      hash[i+4]  = (ctx->state[1] >> (24-i*8)) & 0x000000ff; 
+   // reverse all the bytes when copying the final state to the output hash.
+   for (i=0; i < 4; ++i) {
+      hash[i]    = (ctx->state[0] >> (24-i*8)) & 0x000000ff;
+      hash[i+4]  = (ctx->state[1] >> (24-i*8)) & 0x000000ff;
       hash[i+8]  = (ctx->state[2] >> (24-i*8)) & 0x000000ff;
       hash[i+12] = (ctx->state[3] >> (24-i*8)) & 0x000000ff;
       hash[i+16] = (ctx->state[4] >> (24-i*8)) & 0x000000ff;
       hash[i+20] = (ctx->state[5] >> (24-i*8)) & 0x000000ff;
       hash[i+24] = (ctx->state[6] >> (24-i*8)) & 0x000000ff;
       hash[i+28] = (ctx->state[7] >> (24-i*8)) & 0x000000ff;
-   }  
+   }
 }  // sha256_final
 
 /* Imprime el SHA-2 generado
@@ -540,23 +540,23 @@ usuario   - Codigo de usuario asociado a la llave
 key       - LLave AES a obtener
 */
 int getAESKey( MYSQL *connector, int user_id,  char *key) {
-	
+
    uchar *fixKey = (uchar *)"felipe|felipe|1234";
-   
+
    SHA256_CTX ctx;
    unsigned char hash[32];
    sha256_init(&ctx);
    sha256_update(&ctx,fixKey,strlen((char*)fixKey));
    sha256_final(&ctx,hash);
    //print_hash(hash);
- 
-   
+
+
    int i = 0;
    for (i=0; i < 31; i++)
       key[i] = hash[i];
 
    return 1;
-   
+
    /*
    int ok = 0;
    MYSQL_RES *resultSet;
@@ -572,20 +572,20 @@ int getAESKey( MYSQL *connector, int user_id,  char *key) {
 
    resultSet = mysql_store_result(connector);
    if (  resultSet != 0 && mysql_num_rows( resultSet) != 0)
-   {   
+   {
       MYSQL_ROW row = mysql_fetch_row ( resultSet);
       uint8_t *b = (uint8_t *)row[2];
       int i;
       for ( i= 0; i < 32; i++)
           key[i] = *b++;
-      
+
       ok= 1;
    }
 
    mysql_free_result(resultSet);
-   return ok; 
-   */ 
-	
+   return ok;
+   */
+
 }// getAESKey
 
 
@@ -628,7 +628,7 @@ time_t tm_to_time_t_utc( struct tm * timeptr ) {
 
 /**********************************************************************
    Valida los parametros de una transaccion
- 
+
    connector - Conexión a la base de datos
    param - Lista de parametros de la transaccion
    [0] Codigo  de cuenta-desde
@@ -636,11 +636,11 @@ time_t tm_to_time_t_utc( struct tm * timeptr ) {
    [2] Valor de la transaccion
    [3] Token utilizado
    [4] Tipo de transaccion
- 
+
 */
 char *validate(MYSQL *connector, char** param){
    int   debug = 0;
-   char  *msg  = 0;    
+   char  *msg  = 0;
 
 
    // Ejemplo de una transaccion
@@ -651,7 +651,7 @@ char *validate(MYSQL *connector, char** param){
    // La fecha debe estar bien formada
    // La fecha no puede ser futura
    // La fecha no puede ser anterior a 1 ano
-   
+
    struct  tm  trans_date;
    time_t      now;
    time_t      trans_time;
@@ -668,14 +668,14 @@ char *validate(MYSQL *connector, char** param){
       double seconds = difftime(trans_time, now);
       if (seconds > 0)
          msg ="Fecha de transaccion en el futuro";
-      else 
+      else
       {
          seconds = difftime(now, trans_time);
          if (seconds > 365*24*60*60)
             msg = "Fecha de transaccion anterior a un anio";
       }
-   } 
-   */ 
+   }
+   */
 
    // Cuenta-desde
    // Cuenta debe tener 9 caracteres o menos
@@ -726,7 +726,7 @@ char *validate(MYSQL *connector, char** param){
       else if ( !enoughMoney( connector, param[0], atoi(param[2])))
             msg = "Valor de la transaccion excede el saldo de la cuenta-desde";
    }
-   
+
 
    // Token
    // El token debe estar habilitado
@@ -744,7 +744,7 @@ char *validate(MYSQL *connector, char** param){
    // El tipo de transaccion debe ser numerico
    // El tipo de transaccion debe ser 0 o 1
    if(debug) if ( msg == 0)
-   {   
+   {
       if (strlen( param[4]) > 771)
          msg = "Longitud del tipo de transacción debe ser 1";
       else if (! isNumber(param[4]))
@@ -758,14 +758,14 @@ char *validate(MYSQL *connector, char** param){
 
 
 /********************************************************************************
-   Cifra un buffer con AES-128 en modo CBC utilizando 
-   la biblioteca MCrypt de Linux 
-    
-   buffer     - Texto a cifrar 
-   buffer_len - Longitud real del buffer 
-   IV         - Vector de inicializacion de CBC 
-   key        - La llave de cifrado 
-   key_len    - Longitud de la llave de cifrado 
+   Cifra un buffer con AES-128 en modo CBC utilizando
+   la biblioteca MCrypt de Linux
+
+   buffer     - Texto a cifrar
+   buffer_len - Longitud real del buffer
+   IV         - Vector de inicializacion de CBC
+   key        - La llave de cifrado
+   key_len    - Longitud de la llave de cifrado
 */
 int encrypt(
            void* buffer,
@@ -792,13 +792,13 @@ int encrypt(
 
 /*************************************************************************
 Descifra un texto cifrado con AES-128 modo CBC utilizando
-la biblioteca MCrypt de Linux 
-    
-   buffer     - Texto a descifrar 
-   buffer_len - Longitud real del buffer 
-   IV         - Vector de inicializacion de CBC 
-   key        - La llave de cifrado 
-   key_len    - Longitud de la llave de cifrado 
+la biblioteca MCrypt de Linux
+
+   buffer     - Texto a descifrar
+   buffer_len - Longitud real del buffer
+   IV         - Vector de inicializacion de CBC
+   key        - La llave de cifrado
+   key_len    - Longitud de la llave de cifrado
 */
 int decrypt(
            void* buffer,
@@ -834,7 +834,7 @@ int main (int argc, char *argv[]) {
    FILE* ciphered;        // Archivo cifrado de transacciones
    char *plainName;       // Nombre basico del archivo plano descifrado
    FILE* file;            // Archivo de movimientos
-   
+
    char **param = (char **)malloc( sizeof( char *) * 7); // Parametros en la linea
    char *msg;         // Mensaje de error
    char *p, *q;       // Running pointers sobre los parametros
@@ -845,13 +845,13 @@ int main (int argc, char *argv[]) {
    MYSQL *connector;  // Conexión a la bdd
 
    // Connect to database
-   
+
    char *server   = "localhost";
    char *user     = "advlogin";
    char *password = "Hard+20.";
    char *database = "advlogin";
-   
-   int    buffer_len; 
+
+   int    buffer_len;
    char   *buf;
    int    user_id = atoi( argv[0]);
    char   *IV     = "AAAAAAAAAAAAAAAA";
@@ -878,15 +878,15 @@ int main (int argc, char *argv[]) {
       exit(1);
    }
    printf("::: Ciphered transaction file=%s opened\n", cipheredName);
-  
+
    // Descifre el archivo de movimientos
-   // Obtenga la llave de cifrado con base en el usuario recibido 
+   // Obtenga la llave de cifrado con base en el usuario recibido
     memset( key, 0, 32 * sizeof(char));
     if ( !getAESKey( connector, user_id,  key)) {
 		printf( "No pudo obtener la llave de cifrado\n");
 		exit(1);
-    } 
-    
+    }
+
    // Descifre el archivo y guardelo en el archivo "movements.txt"
    plainName = malloc( sizeof(char) * 200);
    strncpy( plainName, argv[1], 100);
@@ -898,7 +898,7 @@ int main (int argc, char *argv[]) {
       exit(1);
    }
    printf("::: Plain text transaction file %s opened\n", plainName);
-   
+
     if ( ! feof( ciphered)) {
 		buffer_len = fread( buf, sizeof(char), 32000, ciphered);
         int ok = decrypt(buf, buffer_len, IV, key, key_size);
@@ -912,7 +912,7 @@ int main (int argc, char *argv[]) {
     }
     fclose(ciphered);
     fclose(file);
-    
+
    // Procese el archivo descifrado
    printf("\n");
    file = fopen(plainName, "r");
@@ -931,12 +931,12 @@ int main (int argc, char *argv[]) {
       char *b =fgets(line, 80, file);
       if ( b == NULL)
         break;
-        
+
       nM++;
       trim(line);
       if (strlen(line) == 0)
          continue;
-         
+
       if(debug) printf("transaction [%s]\n", line); fflush(stdout);
 
 
@@ -948,9 +948,9 @@ int main (int argc, char *argv[]) {
             printf("*** Error: Linea %d agotada, Falta parametro  %d", nM, i);
             break;
          }
-         
+
          param[i] = (char *)getParms(&p, &q);
-         if(debug)printf("field[%d]=%s\n", i, param[i]); 
+         if(debug)printf("field[%d]=%s\n", i, param[i]);
          if (param[i] == 0) {
             printf("*** Error: Falta parametro  %d", i);
             break;
@@ -983,7 +983,7 @@ int main (int argc, char *argv[]) {
       mysql_commit(connector);
       printf(">>> Batch de transacciones procesado correctamente. N transacciones = %d\n", nM);
    } else
-   {   
+   {
       mysql_rollback(connector);
       printf(">>> Batch de transacciones fue rechazado. N transacciones = %d, N errores = %d\n", nM, nError);
    }
@@ -992,7 +992,7 @@ int main (int argc, char *argv[]) {
    free(param);
    fclose(file);
    return(0);
-   
+
 } // main
 
 
