@@ -7,7 +7,7 @@ import org.securecode.smartcard.tools.LoadProperties;
 /**
  * Clase grafica principal
  *
- * @author Ing. Felipe Giraldo
+ * @author Grupo 4
  * @since Creado el 20 de junio de 2014
  * @version 1.0
  */

@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 /**
  * Clase encargada de generar el SHA-256 de un texto plano
  *
- * @author Ing. Felipe Giraldo
+ * @author Grupo 4
  * @since Creado el 20 de junio de 2014
  * @version 1.0
  */

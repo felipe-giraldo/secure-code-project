@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 /**
  * Clase encargada de cifrar y descifrar usando AES
  *
- * @author Ing. Felipe Giraldo
+ * @author Grupo 4
  * @since Creado el 20 de junio de 2014
  * @version 1.0
  */
