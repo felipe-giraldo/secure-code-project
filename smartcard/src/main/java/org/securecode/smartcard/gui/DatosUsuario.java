@@ -12,7 +12,7 @@ import org.securecode.smartcard.tools.SHA;
 /**
  * Clase grafica para obtener los datos del usuario
  *
- * @author Ing. Felipe Giraldo
+ * @author Grupo 4
  * @since Creado el 20 de junio de 2014
  * @version 1.0
  */
@@ -249,7 +249,7 @@ public class DatosUsuario extends javax.swing.JFrame {
             return null;
     }
     
-    public String getMd5(String message) {
+    private String getMd5(String message) {
         
         String digest = null;
         try {
