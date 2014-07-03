@@ -350,14 +350,40 @@ key       - LLave AES a obtener
 */
 int getAESKey( MYSQL *connector, int user_id,  char *key) {
 	
-   key[0]  = 0xE6;
-   key[1]  = 0x60;
-   key[2]  = 0x3B;
-   key[3]  = 0x02;
-   key[4]  = 0xB9;
-   key[5]  = 0xE1;
-   key[6]  = 0xA5;
-   key[7]  = 0x38;
+   key[0]  =  101    ;
+   key[1]  =  54  ;
+   key[2]  =  54  ;
+   key[3]  =  48  ;
+   key[4]  =  51  ;
+   key[5]  =  98  ;
+   key[6]  =  48  ;
+   key[7]  =  50  ;
+   key[8]  =  98  ;
+   key[9]  =  57  ;
+   key[10] =  101  ;
+   key[11] =  49  ;
+   key[12] =  97  ;
+   key[13] =  53  ;
+   key[14] =  51  ;
+   key[15] =  56  ;
+   /*
+   key[0]  =  0xE6    ;
+   key[1]  =  0x60  ;
+   key[2]  =  0x3B  ;
+   key[3]  =  0x02  ;
+   key[4]  =  0xB9  ;
+   key[5]  =  0xE1  ;
+   key[6]  =  0xA5  ;
+   key[7]  =  0x38  ;
+   key[8]  =  0x32  ;
+   key[9]  =  0xBC  ;
+   key[10] =  0x20  ;
+   key[11] =  0x0E  ;
+   key[12] =  0x4C  ;
+   key[13] =  0x89  ;
+   key[14] =  0xEB  ;
+   key[15] =  0xF2  ;
+   */
 
    return 1;
 	
@@ -678,7 +704,7 @@ int main (int argc, char *argv[]) {
         
       nM++;
       trim(line);
-      if (strlen(line) == 0)
+      if (strlen(line) == 0 || *line == '&')
          continue;
          
       if(debug) printf("transaction [%s]\n", line); fflush(stdout);

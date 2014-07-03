@@ -97,22 +97,24 @@ int main(int argc, char **argv)
    int   keysize    = 16;
    char  *IV        = "AAAAAAAAAAAAAAAA";
 
-   key[0]  = (uchar)   8  ;
-   key[1]  = (uchar) 211  ;
-   key[2]  = (uchar)  52  ;
-   key[3]  = (uchar)  57  ;
-   key[4]  = (uchar) 220  ;
-   key[5]  = (uchar) 212  ;
-   key[6]  = (uchar) 195  ;
-   key[7]  = (uchar) 121  ;
-   key[8]  = (uchar) 204  ;
-   key[9]  = (uchar)  44  ;
-   key[10] = (uchar)  74  ;
-   key[11] = (uchar)  33  ;
-   key[12] = (uchar) 195  ;
-   key[13] = (uchar) 146  ;
-   key[14] = (uchar) 184  ;
-   key[15] = (uchar) 222  ;
+   key[0]  = (uchar) 0xE6    ;
+   key[1]  = (uchar) 0x60  ;
+   key[2]  = (uchar) 0x3B  ;
+   key[3]  = (uchar) 0x02  ;
+   key[4]  = (uchar) 0xB9  ;
+   key[5]  = (uchar) 0xE1  ;
+   key[6]  = (uchar) 0xA5  ;
+   key[7]  = (uchar) 0x38  ;
+   key[8]  = (uchar) 0x32  ;
+   key[9]  = (uchar) 0xBC  ;
+   key[10] = (uchar) 0x20  ;
+   key[11] = (uchar) 0x0E  ;
+   key[12] = (uchar) 0x4C  ;
+   key[13] = (uchar) 0x89  ;
+   key[14] = (uchar) 0xEB  ;
+   key[15] = (uchar) 0xF2  ;
+
+
 
    buffer = (char *) malloc(sizeof(char) * (32000));
 
