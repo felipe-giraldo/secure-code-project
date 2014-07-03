@@ -1,24 +1,26 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package org.securecode.smartcard.gui;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.swing.JOptionPane;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.securecode.smartcard.tools.SHA;
 
 /**
+ * Clase grafica para obtener los datos del usuario
  *
- * @author andres.giraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class DatosUsuario extends javax.swing.JFrame {
 
+    /**
+     * Logger de clase
+     */
     private static final Logger logger = Logger.getLogger(DatosUsuario.class);
     
     /**

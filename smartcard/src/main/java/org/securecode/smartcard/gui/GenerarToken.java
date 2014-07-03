@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.gui;
 
@@ -12,11 +7,17 @@ import org.apache.log4j.Logger;
 import org.securecode.smartcard.tools.SHA;
 
 /**
+ * Clase grafica para generar lo tokens
  *
- * @author felipegiraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class GenerarToken extends javax.swing.JFrame {
     
+    /**
+     * Logger de clase
+     */
     private static final Logger logger = Logger.getLogger(GenerarToken.class);
 
     /**

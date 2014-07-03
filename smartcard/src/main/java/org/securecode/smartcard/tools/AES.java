@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.tools;
 
@@ -25,14 +20,28 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.log4j.Logger;
 
 /**
+ * Clase encargada de cifrar y descifrar usando AES
  *
- * @author felipegiraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class AES {
     
+    /**
+     * Logger de clase
+     */
     private static final Logger logger = Logger.getLogger(AES.class);
+    /**
+     * Propiedades del sistema
+     */
     private static final LoadProperties props = new LoadProperties("configuracion.properties");
     
+    /**
+     * Metodo para hacer pruebas de cifrado y descifrado
+     * 
+     * @param plainText  Cadena con el texto plano a cifrar y descifrar
+     */
     public static void both(String plainText) {
         
         long startEncrypt, endEncrypt, startDecrypt, endDecrypt;
@@ -79,6 +88,13 @@ public class AES {
         }
     }
     
+    /**
+     * Metodo para cifrar un texto plano
+     * 
+     * @param plainText  Cadena con el texto plano a cifrar
+     * @param encryptionKey  Llave de ciframiento
+     * @return  Retorna byte[] con el texto plano cifrado
+     */
     public static byte[] encrypt(String plainText, String encryptionKey) {
         
         try {
@@ -93,6 +109,13 @@ public class AES {
         }
     }
     
+    /**
+     * Metodo para descifrar un texto
+     * 
+     * @param cipherText  byte[] con el texto a descifrar
+     * @param encryptionKey  Llave de ciframiento
+     * @return  Retorna una cadena con el texto descifrado
+     */
     public static String decrypt(byte[] cipherText, String encryptionKey) {
         
         try {
@@ -107,6 +130,13 @@ public class AES {
         }
     }
     
+    /**
+     * Metodo para cifrar un archivo
+     * 
+     * @param encryptionKey  Llave de ciframiento
+     * @param input  File con el apuntador al archivo a cifrar
+     * @param output  File con el apuntador al archivo cifrado
+     */
     public static void encrypyFile(String encryptionKey, File input, File output) {
         
         char[] password = encryptionKey.toCharArray();
@@ -145,6 +175,13 @@ public class AES {
         }
     }
     
+    /**
+     * Metodo para descifrar un archivo
+     * 
+     * @param encryptionKey  Llave de ciframiento
+     * @param input  File con el apuntador al archivo a descifrar
+     * @param output  File con el apuntador al archivo descifrado
+     */
     public static void decryptFile(String encryptionKey, File input, File output) {
 
         char[] password = encryptionKey.toCharArray();
@@ -191,6 +228,13 @@ public class AES {
         }
     }
     
+    /**
+     * Metdo para agregar complejidad a la llave de ciframiento
+     * 
+     * @param pass  char[] con el password
+     * @return  Retorna byte[] con el password
+     * @throws NoSuchAlgorithmException 
+     */
     private static byte[] getPassword16(char[] pass) throws NoSuchAlgorithmException {
         
         MessageDigest md = MessageDigest.getInstance("SHA-1");

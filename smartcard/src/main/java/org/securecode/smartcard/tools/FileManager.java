@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.tools;
 
@@ -22,13 +17,25 @@ import java.io.PrintWriter;
 import org.apache.log4j.Logger;
 
 /**
+ * Clase encargada de administrar las operaciones de archivos
  *
- * @author felipegiraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class FileManager {
     
+    /**
+     * Logger de clase
+     */
     private final Logger logger = Logger.getLogger(FileManager.class);
     
+    /**
+     * Metodo para obtener un bufer de lectura desde un archivo en el sistema
+     * 
+     * @param fileName  Cadena con el nombre del archivo a leer
+     * @return  Retorna un BufferedReader con la informacion del archivo leido
+     */
     public BufferedReader readFromFile(String fileName) {
         
         File file = new File(fileName);
@@ -43,6 +50,12 @@ public class FileManager {
         }
     }
     
+    /**
+     * Metodo para escribir lineas en un archivo en el sistema
+     * 
+     * @param fileName  Cadena con el nombre del archivo donde se va escribir
+     * @param line  Cadena con la linea a escribir en el archivo
+     */
     public void writeToFile(String fileName, String line) {
         
         File file = new File(fileName);
@@ -72,6 +85,12 @@ public class FileManager {
         }
     }
     
+    /**
+     * Metodo para obtener un arreglo de bytes desde un archivo en el sistema
+     * 
+     * @param fileName  Cadena con el nombre del archivo a leer
+     * @return  Retorna un byte[] con la informacion del archivo leido
+     */
     public byte[] readFileToByte(String fileName) {
         
         byte[] bytes = null;
@@ -107,6 +126,13 @@ public class FileManager {
         return bytes;
     }
     
+    /**
+     * Metodo para escribir un arreglo de bytes en un archivo en el sistema
+     * 
+     * @param bytes  Bytes con la informacion a escribir
+     * @param fileName  Cadena con el nombre del archivo donde se va escribir
+     * @return  Retorna verdadero si puede escribir o falso de lo contrario
+     */
     public boolean writeByteToFile(byte[] bytes, String fileName) {
         
         boolean correcto = false;

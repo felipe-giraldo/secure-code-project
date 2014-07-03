@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.gui;
 
@@ -10,8 +5,11 @@ import org.apache.log4j.PropertyConfigurator;
 import org.securecode.smartcard.tools.LoadProperties;
 
 /**
+ * Clase grafica principal
  *
- * @author felipegiraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class Principal extends javax.swing.JFrame {
 

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.tools;
 
@@ -19,7 +14,7 @@ import org.apache.log4j.Logger;
  * Clase encargada de cargar archivos de propiedades
  *
  * @author Ing. Felipe Giraldo
- * @since Creado el 19 de octubre de 2010
+ * @since Creado el 20 de junio de 2014
  * @version 1.0
  */
 public class LoadProperties {

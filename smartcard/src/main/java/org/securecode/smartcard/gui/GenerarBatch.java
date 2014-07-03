@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.gui;
 
@@ -17,14 +12,29 @@ import org.securecode.smartcard.tools.FileManager;
 import org.securecode.smartcard.tools.LoadProperties;
 
 /**
+ * Clase grafica para generar el archivo batch
  *
- * @author felipegiraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class GenerarBatch extends javax.swing.JFrame {
 
+    /**
+     * Logger de clase
+     */
     private static final Logger logger = Logger.getLogger(GenerarBatch.class);
+    /**
+     * Propiedades del sistema
+     */
     private static final LoadProperties props = new LoadProperties("configuracion.properties");
+    /**
+     * Bandera para imprimir logs de monitores
+     */
     private static boolean print = false;
+    /**
+     * Llave de ciframiento
+     */
     private String key;
     
     /**

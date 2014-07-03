@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.tools;
 
@@ -12,13 +7,25 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 
 /**
+ * Clase encargada de generar el SHA-256 de un texto plano
  *
- * @author andres.giraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class SHA {
     
+    /**
+     * Logger de clase
+     */
     private static final Logger logger = Logger.getLogger(SHA.class);
-    
+
+    /**
+     * Metodo para generar el SHA-256 de un texto plano
+     * 
+     * @param plainText  Cadena de texto con el texto plano
+     * @return  Retorna el SHA-256 del texto plano
+     */
     public static String getSHA256(String plainText) {
         
         try {

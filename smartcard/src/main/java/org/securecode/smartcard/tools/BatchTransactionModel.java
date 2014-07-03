@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package org.securecode.smartcard.tools;
 
@@ -10,8 +5,11 @@ import java.math.BigInteger;
 import org.apache.commons.lang.StringUtils;
 
 /**
+ * Clase entidad para mapear las transacciones batch
  *
- * @author felipegiraldo
+ * @author Ing. Felipe Giraldo
+ * @since Creado el 20 de junio de 2014
+ * @version 1.0
  */
 public class BatchTransactionModel {
     
