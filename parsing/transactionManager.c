@@ -596,11 +596,11 @@ int decrypt(
  * Main method
  */
 
-
 int main (int argc, char *argv[]) {
-   int   debug=0;          // debug flag
-   char line[81];         // Linea de movimientos
-   char  *fileName;       // Ruta basico del archivo a procesar
+   int   debug=0;         // debug flag
+   char  line[81];        // Linea de movimientos
+   char  *baseDir;        // Directorio base del programa y los datos
+   char  *baseFile;       // Ruta basico del archivo a procesar
    char  *cipheredName;   // Nombre del archivo cifrado a procesar
    FILE* ciphered;        // Archivo cifrado de transacciones
    char *plainName;       // Nombre basico del archivo plano descifrado
@@ -628,18 +628,40 @@ int main (int argc, char *argv[]) {
    char   key[32];
    int    key_size = 16;
 
-   if (argc != 17)                     
+   if (argc < 17)                     
    {                                   
       printf("*** Faltan parámetros");
       exit(1);                         
-   }                                   
-                                       
-   for (i = 0; i < key_size; i++)      
-      key[i] = atoi(argv[i+1]);       
+   } 
+   
+   //  Obtenga el directorio base y el nombre base del archivo de movimientos
+   baseDir = (char *)malloc( sizeof(char) * 140);
+   memset( baseDir, 0, 140 * sizeof(char));
+   if ( argc > 17)
+      strncpy(baseDir, argv[17], 139);
+   else
+      baseDir = "/home/secure/parsing/";
+      
+   baseFile = (char *)malloc( sizeof(char) * 60);
+   memset( baseFile, 0, 60 * sizeof(char));
+   if ( argc > 18)
+      strncpy(baseFile, argv[18], 59);
+   else
+      baseFile = "movements";
 
+   // Obtenga la llave de cifrado                               
+   if( debug)printf(">>> key  ");                     
+   for (i = 0; i < key_size; i++) {     
+      key[i] = atoi(argv[i+1]);  
+      printf( " %d", key[i]);
+   }
+   printf("\n");     
 
+   // Obtenga un buffer para descifrado del archivo de transacciones
    buf = (char *) malloc(sizeof(char) * (32000));
+   memset( buf, 0, 32000 * sizeof(char));
 
+   // Conexion a la bdd
    connector = mysql_init(NULL);
    if (!mysql_real_connect(connector, server, user, password, database, 0, NULL, 0))
    {
@@ -647,42 +669,39 @@ int main (int argc, char *argv[]) {
       exit(1);
    }
 
-   // Abra el archivo de transacciones
-   cipheredName = malloc( sizeof( char) * 200);
-   fileName = "/home/secure/parsing/movements";
-   strncpy( cipheredName, fileName,100);
-   strcat( cipheredName,".cif");
+   // Procese el archivo cifrado de transacciones
+   cipheredName = malloc( sizeof( char) * 210);
+   memset ( cipheredName, 0, 210 * sizeof(char));
+   strncpy( cipheredName, baseDir, 139);
+   strncat( cipheredName, baseFile, 60);
+   strcat ( cipheredName,".cif");
+   printf(">>> Encrypted file[%s]\n", cipheredName);
+   
    ciphered = fopen(cipheredName, "r");
    if (ciphered == NULL)
    {
       printf("*** Archivo inexistente!\n");
       exit(1);
    }
-   printf("::: Ciphered transaction file=%s opened\n", cipheredName);
-  
-   // Descifre el archivo de movimientos
-   // Obtenga la llave de cifrado con base en el usuario recibido 
-/*
-    memset( key, 0, 32 * sizeof(char));                
-    if ( !getAESKey( connector, user_id,  key)) {      
-      printf( "No pudo obtener la llave de cifrado\n");
-      exit(1);                                         
-    }                                                  
-*/
+   if ( debug)printf("::: Ciphered transaction file=%s opened\n", cipheredName);
     
    // Descifre el archivo y guardelo en el archivo "movements.txt"
-   plainName = malloc( sizeof(char) * 200);
-   strncpy( plainName, fileName, 100);
-   strcat(plainName, ".txt");
+   plainName = malloc( sizeof( char) * 210);
+   memset ( plainName, 0, 210 * sizeof(char));
+   strncpy( plainName, baseDir, 139);
+   strncat( plainName, baseFile, 60);
+   strcat ( plainName,".txt");
+   printf(">>> Decrypted file[%s]\n", plainName);
+
    file = fopen(plainName, "w");
    if (file == NULL)
    {
       printf("*** No pudo crear archivo de movimientos!\n");
       exit(1);
    }
-   printf("::: Plain text transaction file %s opened\n", plainName);
+   if ( debug)printf("::: Plain text transaction file %s opened\n", plainName);
    
-    if ( ! feof( ciphered)) {
+   if ( ! feof( ciphered)) {
 		buffer_len = fread( buf, sizeof(char), 32000, ciphered);
         int ok = decrypt(buf, buffer_len, IV, key, key_size);
         if(debug) fwrite( buf, sizeof(char), buffer_len, stdout);
