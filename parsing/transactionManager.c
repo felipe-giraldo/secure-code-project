@@ -623,10 +623,19 @@ int main (int argc, char *argv[]) {
    
    int    buffer_len; 
    char   *buf;
-   int    user_id = atoi( argv[0]);
    char   *IV     = "AAAAAAAAAAAAAAAA";
    char   key[32];
    int    key_size = 16;
+
+   if (argc != 17)                     
+   {                                   
+      printf("*** Faltan parámetros");
+      exit(1);                         
+   }                                   
+                                       
+   for (i = 0; i < key_size; i++)      
+      key[i] = atoi(argv[i+1]);       
+
 
    buf = (char *) malloc(sizeof(char) * (32000));
 
@@ -651,11 +660,13 @@ int main (int argc, char *argv[]) {
   
    // Descifre el archivo de movimientos
    // Obtenga la llave de cifrado con base en el usuario recibido 
-    memset( key, 0, 32 * sizeof(char));
-    if ( !getAESKey( connector, user_id,  key)) {
-		printf( "No pudo obtener la llave de cifrado\n");
-		exit(1);
-    } 
+/*
+    memset( key, 0, 32 * sizeof(char));                
+    if ( !getAESKey( connector, user_id,  key)) {      
+      printf( "No pudo obtener la llave de cifrado\n");
+      exit(1);                                         
+    }                                                  
+*/
     
    // Descifre el archivo y guardelo en el archivo "movements.txt"
    plainName = malloc( sizeof(char) * 200);
@@ -764,6 +775,7 @@ int main (int argc, char *argv[]) {
    return(0);
    
 } // main
+
 
 
 
