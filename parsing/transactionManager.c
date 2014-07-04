@@ -600,7 +600,8 @@ int decrypt(
 int main (int argc, char *argv[]) {
    int   debug=0;          // debug flag
    char line[81];         // Linea de movimientos
-   char  *cipheredName;   // Nombre basico del archivo a procesar
+   char  *fileName;       // Ruta basico del archivo a procesar
+   char  *cipheredName;   // Nombre del archivo cifrado a procesar
    FILE* ciphered;        // Archivo cifrado de transacciones
    char *plainName;       // Nombre basico del archivo plano descifrado
    FILE* file;            // Archivo de movimientos
@@ -648,7 +649,8 @@ int main (int argc, char *argv[]) {
 
    // Abra el archivo de transacciones
    cipheredName = malloc( sizeof( char) * 200);
-   strncpy( cipheredName, argv[1],100);
+   fileName = "/home/secure/parsing/movements";
+   strncpy( cipheredName, fileName,100);
    strcat( cipheredName,".cif");
    ciphered = fopen(cipheredName, "r");
    if (ciphered == NULL)
@@ -670,7 +672,7 @@ int main (int argc, char *argv[]) {
     
    // Descifre el archivo y guardelo en el archivo "movements.txt"
    plainName = malloc( sizeof(char) * 200);
-   strncpy( plainName, argv[1], 100);
+   strncpy( plainName, fileName, 100);
    strcat(plainName, ".txt");
    file = fopen(plainName, "w");
    if (file == NULL)
