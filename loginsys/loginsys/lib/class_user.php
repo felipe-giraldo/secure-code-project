@@ -961,17 +961,22 @@
 	  }
 
 		public function loadBatchFile($username, $password, $pin){
-			//$uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
-			//$uploadfile = "C:" . DIRECTORY_SEPARATOR . "TestFiles". DIRECTORY_SEPARATOR . "sdf.txt";
-			$uploadfile = '/home/secure/parsing/movements.aes';
+			$uploadfile = '/home/secure/parsing/movements.cif';
 			$string = $username . '|' . $password . '|' .  $pin;
 			$string = hash('SHA256', $string);
 			$sub_string = substr($string, 0, 16);
-			//echo "PERMISOS =  " . is_writable($uploadfile); 
+			//echo "SHA = " . $sub_string;
+			$key = '';
+			
+			for($i=0; $i < strlen($sub_string); $i++){
+				$key .= ord($sub_string[$i]) . ' ';
+			}
+			
+			//echo "CADENA DE BYTES =  " . $key;  
 			
 			if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
-				echo "El archivo es válido y fue cargado exitosamente.\n";
-				exec("/home/secure/parsing/transactionManager " . sub_string);
+				//echo "El archivo es válido y fue cargado exitosamente.\n";
+				exec("/home/secure/parsing/transactionManager " . $key);
 			} else {
 				Filter::msgError('<span>Error!</span>There was an error with loading file. <br>Please verify your data.');
 			}
