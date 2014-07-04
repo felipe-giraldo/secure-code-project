@@ -31,7 +31,7 @@ public class GenerarBatch extends javax.swing.JFrame {
     /**
      * Bandera para imprimir logs de monitores
      */
-    private static boolean print = false;
+    private static final boolean print = false;
     /**
      * Llave de ciframiento
      */
@@ -264,7 +264,7 @@ public class GenerarBatch extends javax.swing.JFrame {
             }
             
             output.append(item.toString());
-            output.append("||");
+            output.append("|1\n");
             continuar = true;
         }
         
