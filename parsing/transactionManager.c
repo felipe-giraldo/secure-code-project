@@ -653,9 +653,9 @@ int main (int argc, char *argv[]) {
    if( debug)printf(">>> key  ");                     
    for (i = 0; i < key_size; i++) {     
       key[i] = atoi(argv[i+1]);  
-      printf( " %d", key[i]);
+      if ( debug)printf( " %d", key[i]);
    }
-   printf("\n");     
+   printf("\n\n");     
 
    // Obtenga un buffer para descifrado del archivo de transacciones
    buf = (char *) malloc(sizeof(char) * (32000));
@@ -683,7 +683,7 @@ int main (int argc, char *argv[]) {
       printf("*** Archivo inexistente!\n");
       exit(1);
    }
-   if ( debug)printf("::: Ciphered transaction file=%s opened\n", cipheredName);
+   if ( debug)printf("::: Encrypted transaction file=%s opened\n", cipheredName);
     
    // Descifre el archivo y guardelo en el archivo "movements.txt"
    plainName = malloc( sizeof( char) * 210);
@@ -747,14 +747,14 @@ int main (int argc, char *argv[]) {
       for (i = 0; i < 5; i ++)
       {
          if ((p - line) > 80) {
-            printf("*** Error: Linea %d agotada, Falta parametro  %d", nM, i);
+            printf("*** Error: Linea [%d] agotada, Falta parametro  %d", nM, i);
             break;
          }
          
          param[i] = (char *)getParms(&p, &q);
          if(debug)printf("field[%d]=%s\n", i, param[i]); 
          if (param[i] == 0) {
-            printf("*** Error: Falta parametro  %d", i);
+            printf("*** Error: Línea[%d] Falta parametro  %d", nM, i);
             break;
          }
       }
@@ -765,7 +765,7 @@ int main (int argc, char *argv[]) {
       msg = validate( connector, param);
       if ( msg != 0) {
          nError++;
-         printf( "*** Linea[%d], error: %s\n", nM, msg);
+         printf( "*** Error: Linea[%d]: %s\n", nM, msg);
          continue;
       }
 
@@ -774,7 +774,7 @@ int main (int argc, char *argv[]) {
       if (res)
          nError++;
 
-      // Libere la memoria alocada para cada transacccion
+      // Libere la memoria obtenida para cada transacccion
       for (i = 0; i < 5; i ++)
          free(param[i]);
 
