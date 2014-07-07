@@ -6,16 +6,14 @@
       die('Direct access to this location is not allowed.');
 ?>
 
-<?php //$userrow = $user->getUsers();
+<?php 
     $row = $user->getUserData();
     $useraccounts = $core->getAccounts($row->id);
 ?>
-<?php //echo Core::doForm("processTransfer","ajax/controller_tr.php");
+<?php 
     if (isset($_POST['btnTransfer'])):
         $row = $user->getUserData();
-        $core->makeTransfer($row->id, 1);
-        //haceTransfer($row->id, $_POST['t_token'], $_POST['origin_account'], $_POST['destination_account'], $_POST['ammount']);
-        //redirect_to("main.php?do=transactions");
+        $core->smcTransfer($row->id);
     endif;
     if (isset($_POST['btnCancel'])):
         redirect_to("account.php");
@@ -56,7 +54,13 @@
           </section>
             <section class="col col-4">
             <label class="input"> <i class="icon-prepend icon-search"></i>
-              <input type="text" name="t_token" class="validate[required, minSize[15], maxSize[15] ]" id="search-input" placeholder="Token for transaction">
+              <input type="text" name="t_token" class="validate[required, minSize[15], maxSize[15] ]" id="search-input" placeholder="PIN for transaction">
+            </label>
+            <div id="suggestions"></div>
+          </section>
+            <section class="col col-4">
+            <label class="input"> <i class="icon-prepend icon-search"></i>
+              <input type="text" name="v_token" class="validate[required, minSize[15], maxSize[15] ]" id="search-input" placeholder="Token for transaction">
             </label>
             <div id="suggestions"></div>
           </section>

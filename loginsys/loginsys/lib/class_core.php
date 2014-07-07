@@ -631,7 +631,7 @@
                 Filter::$msgs['t_token'] = 'Please insert a valid PIN';
             endif;
             if(empty($v_token) or strlen($v_token) < 6):
-                Filter::$msgs['t_token'] = 'Please insert a valid TOKEN';
+                Filter::$msgs['v_token'] = 'Please insert a valid TOKEN';
             endif;
           
           if (empty(Filter::$msgs)):
@@ -639,7 +639,7 @@
               $string = hash('SHA256', $string);
               $sub_string = substr($string, 0, 6);
               
-              if ($sub_string == $v_token):
+              if ($sub_string === $v_token):
                   //makeTransfer($userID, $type, $origin=false, $destination=false, $ammount=false, $token=false, $approval = false, $transaction_id = false
                   $this->makeTransfer($userID, 1, $origin, $destination, $ammount, 1, 1);
               else:

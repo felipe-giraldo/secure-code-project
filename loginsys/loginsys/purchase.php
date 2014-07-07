@@ -7,22 +7,14 @@
 ?>
 
 <?php 
-    $string = 'ehrlichmann' . '|' . '4ba40fedbbd3a54f81c72e14cc52c289' . '|' . '4567';
-    $string = hash('SHA256', $string);
-    $sub_string = substr($string, 0, 16);
-    echo $sub_string;
-
-	//$userrow = $user->getUsers();
 	$row = $user->getUserData();
     $useraccounts = $core->getAccounts($row->id);
-    //$vendors = $core->getVendors();
+
 ?>
-<?php //echo Core::doForm("processTransfer","ajax/controller_tr.php");
+<?php 
     if (isset($_POST['btnTransfer'])):
         $row = $user->getUserData();
         $core->makeTransfer($row->id, 2);
-        //haceTransfer($row->id, $_POST['t_token'], $_POST['origin_account'], $_POST['destination_account'], $_POST['ammount']);
-        //redirect_to("main.php?do=transactions");
     endif;
     if (isset($_POST['btnCancel'])):
         redirect_to("account.php");

@@ -12,7 +12,7 @@
 	 define('DB_USER', 'advlogin'); 
 	 define('DB_PASS', 'Hard+20.'); 
 	 define('DB_DATABASE', 'advlogin');
- 
+
 	/** 
 	* Show MySql Errors. 
 	* Not recomended for live site. true/false 

@@ -5,16 +5,16 @@
 <?php //error_reporting(E_ALL);
   
   $BASEPATH = str_replace("init.php", "", realpath(__FILE__));
+  //$BASEPATH =  str_replace("init.php", "", $_SERVER["REQUEST_URI"]);
   
   define("BASEPATH", $BASEPATH);
   
   $configFile = BASEPATH . "lib/config.ini.php";
+
   if (file_exists($configFile)) {
       require_once($configFile);
-  } else {
-      header("Location: setup/");
   }
-  
+
   require_once(BASEPATH . "lib/class_db.php");
   
   require_once(BASEPATH . "lib/class_registry.php");
