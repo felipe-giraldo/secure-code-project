@@ -449,7 +449,10 @@
           
       }
       
-      public function makeTransfer($userID, $type, $origin=false, $destination=false, $ammount=false, $token=false, $approval = false, $transaction_id = false){
+      public function makeTransfer( $userID, $type, $origin=false, 
+                                    $destination=false, $ammount=false, 
+                                    $token=false, $approval = false, 
+                                    $transaction_id = false, $new_token = false){
           if(!$origin):
                 $origin = sanitize($_POST['origin_account']);
           endif;
@@ -511,6 +514,8 @@
                   Filter::$msgs['t_token'] = 'Please insert a valid and available token key';
               endif;
             endif;
+            else:
+                $token = $new_token;
           endif;
           
           $funds = self::checkFunds($origin, $ammount);
@@ -628,7 +633,7 @@
               
               if ($sub_string === $v_token):
                   //makeTransfer($userID, $type, $origin=false, $destination=false, $ammount=false, $token=false, $approval = false, $transaction_id = false
-                  $this->makeTransfer($userID, 1, $origin, $destination, $ammount, 1, 0);
+                  $this->makeTransfer($userID, 1, $origin, $destination, $ammount, 1, 0, 0, $sub_string);
               else:
                   Filter::msgError('<span>Error!</span>There was an error with the information supplied. <br>Please verify your data.');
               endif;
