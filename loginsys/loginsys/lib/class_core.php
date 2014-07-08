@@ -518,20 +518,7 @@
           
           $funds2 = self::checkFunds($destination, $ammount);
           $funds_destination = $funds2->money;
-          //Filter::$msgs['ammount'] = 'You dont have enough funds to make this transfer ' . $funds . " " . $funds2;
-          
-          /*
-          echo "Fondos Origen: " . $funds_origin . " Fondos Destino: " . $funds_destination . 
-              "<br>" . "Cuenta origen: " . $origin . " Cuenta Destino: " . $destination . 
-              "<br>Cantidad: " . $ammount . "<br> Token: " . $token . " Tamanho: " . strlen($token) . 
-              " Token usado: " . $v_token . " UserID: " . $userID .
-              "<br> es numerico: " . is_numeric($v_token) . " Es set: " . is_null($v_token);
-           * 
-           */
-           
-           
-           
-          
+ 
           if($funds->money < $ammount) :
               Filter::$msgs['ammount'] = 'You dont have enough funds to make this transfer / payment';
           endif;
@@ -641,7 +628,7 @@
               
               if ($sub_string === $v_token):
                   //makeTransfer($userID, $type, $origin=false, $destination=false, $ammount=false, $token=false, $approval = false, $transaction_id = false
-                  $this->makeTransfer($userID, 1, $origin, $destination, $ammount, 1, 1);
+                  $this->makeTransfer($userID, 1, $origin, $destination, $ammount, 1, 0);
               else:
                   Filter::msgError('<span>Error!</span>There was an error with the information supplied. <br>Please verify your data.');
               endif;

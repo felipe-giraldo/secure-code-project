@@ -18,6 +18,15 @@
     if (isset($_POST['btnCancel'])):
         redirect_to("account.php");
     endif;
+    
+    /*
+    $string = '39695959' . '|' . '86423334' . '|' .  '1000' . '|' . '7584';
+    $string = hash('SHA256', $string);
+    $sub_string = substr($string, 0, 6);
+    
+    echo $sub_string;
+     * 
+     */
 ?> 
 <p class="bluetip"><i class="icon-lightbulb icon-3x pull-left"></i>Here you can transfer money to other accounts <br />
   The destination account must be linked to your main account in order to make the transfer.</p>
@@ -75,81 +84,3 @@
     </div>
     <?php echo $pager->display_pages();?> </div>
 </section>
-
-<script type="text/javascript"> 
-// <![CDATA[
-$(document).ready(function () {
-    $('a.activate').on('click', function () {
-        var uid = $(this).attr('id').replace('act_', '')
-        var text = "<i class=\"icon-warning-sign icon-3x pull-left\"></i>Are you sure you want to activate this user account?<br /><strong>Email notification will be sent as well</strong>";
-        new Messi(text, {
-            title: "Activate User Account",
-            modal: true,
-            closeButton: true,
-            buttons: [{
-                id: 0,
-                label: "Activate",
-                val: 'Y'
-            }],
-			  callback: function (val) {
-				  $.ajax({
-					  type: 'post',
-					  url: "controller.php",
-					  data: {
-						  activateAccount: 1,
-						  id: uid,
-					  },
-					  cache: false,
-					  beforeSend: function () {
-						  showLoader();
-					  },
-					  success: function (msg) {
-						  hideLoader();
-						  $("#msgholder").html(msg);
-						  $('html, body').animate({
-							  scrollTop: 0
-						  }, 600);
-					  }
-				  });
-			  }
-        });
-    });
-    $("#search-input").on("keyup", function () {
-        var srch_string = $(this).val();
-        var data_string = 'userSearch=' + srch_string;
-        if (srch_string.length > 3) {
-            $.ajax({
-                type: "POST",
-                url: "controller.php",
-                data: data_string,
-                beforeSend: function () {
-                    $('#search-input').addClass('loading');
-                },
-                success: function (res) {
-                    $('#suggestions').html(res).show();
-                    $("input").blur(function () {
-                        $('#suggestions').fadeOut();
-                    });
-                    if ($('#search-input').hasClass("loading")) {
-                        $("#search-input").removeClass("loading");
-                    }
-                }
-            });
-        }
-        return false;
-    });
-    var dates = $('#fromdate, #enddate').datepicker({
-        defaultDate: "+1w",
-        changeMonth: false,
-        numberOfMonths: 2,
-        dateFormat: 'yy-mm-dd',
-        onSelect: function (selectedDate) {
-            var option = this.id == "fromdate" ? "minDate" : "maxDate";
-            var instance = $(this).data("datepicker");
-            var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
-            dates.not(this).datepicker("option", option, date);
-        }
-    });
-});
-// ]]>
-</script>
